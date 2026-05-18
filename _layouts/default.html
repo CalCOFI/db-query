@@ -14,6 +14,10 @@
     document.documentElement.dataset.theme =
       localStorage.getItem("theme") || "dark";
   </script>
+  <link rel="icon"             type="image/x-icon"  href="{{ '/assets/favicon.ico'              | relative_url }}">
+  <link rel="icon"             type="image/png" sizes="32x32" href="{{ '/assets/favicon-32x32.png' | relative_url }}">
+  <link rel="icon"             type="image/png" sizes="16x16" href="{{ '/assets/favicon-16x16.png' | relative_url }}">
+  <link rel="apple-touch-icon" sizes="180x180"  href="{{ '/assets/apple-touch-icon-180x180.png' | relative_url }}">
   <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
 </head>
 <body>
@@ -21,6 +25,17 @@
 <div id="layout">
 
   <header class="app-header">
+    <a class="app-logo" href="{{ '/' | relative_url }}" aria-label="CalCOFI Query — home">
+      {%- comment -%}
+        Two SVGs, one per theme — the active one is shown via CSS rules in style.css
+        (`[data-theme=dark] .logo-light` and `[data-theme=light] .logo-dark` hide the
+        wrong-theme variant). `logo_calcofi.svg` has a white text fill (for the dark
+        background); `logo_calcofi_light.svg` has a dark text fill (for the light
+        background). The yellow CalCOFI "CC" mark is the same in both.
+      {%- endcomment -%}
+      <img class="logo-dark"  src="{{ '/assets/logo_calcofi.svg'       | relative_url }}" alt="CalCOFI" width="32" height="32">
+      <img class="logo-light" src="{{ '/assets/logo_calcofi_light.svg' | relative_url }}" alt="CalCOFI" width="32" height="32">
+    </a>
     <h1>{{ site.title }}</h1>
     <span class="release">
       release&nbsp;<a id="release-link" href="https://storage.googleapis.com/calcofi-db/ducklake/releases/{{ site.default_version }}/RELEASE_NOTES.md">{{ site.default_version }}</a>
