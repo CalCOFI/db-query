@@ -66,6 +66,22 @@ header.app-header {
   border-bottom: 1px solid var(--border);
   font-size: 0.9rem;
 }
+header.app-header .app-logo {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  text-decoration: none;
+}
+header.app-header .app-logo:hover { text-decoration: none; }
+header.app-header .app-logo img {
+  height: 32px; width: auto;
+  display: block;
+}
+/* Theme swap: dark theme shows the white-text logo; light theme shows the dark-text one. */
+:root[data-theme="dark"]  header.app-header .logo-light,
+:root:not([data-theme="light"]) header.app-header .logo-light { display: none; }
+:root[data-theme="light"] header.app-header .logo-dark  { display: none; }
+
 header.app-header h1 {
   margin: 0;
   font-size: 1.05rem; font-weight: 700;
