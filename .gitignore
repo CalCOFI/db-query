@@ -1,0 +1,12 @@
+_site/
+.jekyll-cache/
+.jekyll-metadata
+.bundle/
+vendor/
+node_modules/
+.DS_Store
+*.log
+
+# Local-only test artifacts
+/tmp/
+/test-results/

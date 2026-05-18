@@ -1,0 +1,31 @@
+<section id="result" hidden>
+  <nav class="subtabs" role="tablist" id="subtabs">
+    <button role="tab" data-subtab="results" aria-selected="true">Results</button>
+    <button role="tab" data-subtab="sql"     aria-selected="false">SQL</button>
+    <button role="tab" data-subtab="meta"    aria-selected="false">Metadata</button>
+  </nav>
+
+  <div id="panel-results" class="subpanel">
+    <div class="result-toolbar">
+      <span id="row-count"></span>
+      <span class="spacer"></span>
+      <button class="secondary" id="dl-csv" type="button">Download CSV</button>
+    </div>
+    <div id="table-wrap"></div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <div id="panel-sql" class="subpanel" hidden>
+    <div class="result-toolbar">
+      <span class="hint">Copy-paste runnable in any DuckDB client (httpfs + spatial pre-loaded).</span>
+      <span class="spacer"></span>
+      <button class="secondary" id="copy-sql" type="button">Copy SQL</button>
+      <button class="secondary" id="dl-sql"   type="button">Download <code>.sql</code></button>
+    </div>
+    <pre class="codeblock"><code id="sql-text"></code></pre>
+  </div>
+
+  <div id="panel-meta" class="subpanel" hidden>
+    <pre class="codeblock"><code id="meta-text"></code></pre>
+  </div>
+</section>

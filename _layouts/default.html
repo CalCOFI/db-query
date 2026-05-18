@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page.title | default: site.title }}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  {%- comment -%}
+    Apply the saved theme before stylesheet load to avoid a flash of the
+    wrong background on cold paint. The toggle in app.js updates the same
+    attribute and persists to localStorage.
+  {%- endcomment -%}
+  <script>
+    document.documentElement.dataset.theme =
+      localStorage.getItem("theme") || "dark";
+  </script>
+  <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
+</head>
+<body>
+
+<div id="layout">
+
+  <header class="app-header">
+    <h1>{{ site.title }}</h1>
+    <span class="release">
+      release&nbsp;<a id="release-link" href="https://storage.googleapis.com/calcofi-db/ducklake/releases/{{ site.default_version }}/RELEASE_NOTES.md">{{ site.default_version }}</a>
+    </span>
+    <span class="spacer"></span>
+    <span id="status">Ready — pick a query and click Run.</span>
+    <button id="theme-toggle" type="button" aria-label="Toggle dark / light theme">🌓</button>
+  </header>
+
+  <div id="body">
+    <aside id="nav">
+      {{ content | split: "<!-- NAV -->" | first }}
+    </aside>
+    <main id="panel">
+      {{ content | split: "<!-- NAV -->" | last }}
+      <footer class="app-footer">
+        <p>
+          Source · <a href="https://github.com/CalCOFI/query">CalCOFI/query</a>
+          · Engine · <a href="https://duckdb.org/docs/api/wasm/overview.html">DuckDB-WASM</a>
+          v{{ site.duckdb_wasm_version }}
+          · Data · <a href="https://storage.googleapis.com/calcofi-db/ducklake/releases/">public Parquet on GCS</a>
+          · See also · <a href="https://calcofi.io/docs/">CalCOFI docs</a> ·
+          <a href="https://calcofi.io/calcofi4r/">calcofi4r</a>
+        </p>
+      </footer>
+    </main>
+  </div>
+
+</div>
+
+<script type="module" src="{{ '/app.js' | relative_url }}"></script>
+</body>
+</html>

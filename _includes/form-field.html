@@ -1,0 +1,90 @@
+{%- comment -%}
+  Renders one form field from a `parameters` entry.
+
+  Inputs:
+    include.name  — the parameter name (becomes the form input's `name`)
+    include.spec  — the YAML hash from frontmatter, e.g.
+                    { type: text, default: "Sardinops sagax", required: true }
+
+  Recognized spec keys: type, label, default, required, hint, options, options_from
+{%- endcomment -%}
+{% assign type   = include.spec.type %}
+{% assign label  = include.spec.label | default: include.name %}
+{% assign def    = include.spec.default %}
+{% assign hint   = include.spec.hint %}
+{% assign req    = include.spec.required %}
+{% assign opts   = include.spec.options %}
+{% assign opts_from = include.spec.options_from %}
+{% assign field_class = "field" %}
+{% if type == "radio"    %}{% assign field_class = "field radio" %}{% endif %}
+{% if type == "checkbox" %}{% assign field_class = "field check" %}{% endif %}
+{% if type == "textarea" %}{% assign field_class = "field span-all" %}{% endif %}
+
+<div class="{{ field_class }}">
+
+  {% case type %}
+
+  {% when "text" %}
+    <label>{{ label }}</label>
+    <input type="text" name="{{ include.name }}" value="{{ def }}"
+           {% if req %}required{% endif %}>
+
+  {% when "number" %}
+    <label>{{ label }}</label>
+    <input type="number" name="{{ include.name }}" value="{{ def }}" step="any"
+           {% if req %}required{% endif %}>
+
+  {% when "date" %}
+    <label>{{ label }}</label>
+    <input type="date" name="{{ include.name }}" value="{{ def }}"
+           {% if req %}required{% endif %}>
+
+  {% when "select" %}
+    <label>{{ label }}</label>
+    <select name="{{ include.name }}"
+            {% if opts_from %}data-options-from="{{ opts_from }}"{% endif %}>
+      {% if opts %}
+        {% for opt in opts %}
+          <option value="{{ opt }}" {% if opt == def %}selected{% endif %}>{{ opt }}</option>
+        {% endfor %}
+      {% else %}
+        {%- comment -%} populated at runtime by lib/options-sources.js {%- endcomment -%}
+        <option value="{{ def }}" selected>{{ def }}</option>
+      {% endif %}
+    </select>
+
+  {% when "radio" %}
+    <span class="label">{{ label }}</span>
+    <div class="opts">
+      {% for opt in opts %}
+        <label>
+          <input type="radio" name="{{ include.name }}" value="{{ opt }}"
+                 {% if opt == def %}checked{% endif %}>
+          {% if opt == "" %}<em>any</em>{% else %}{{ opt }}{% endif %}
+        </label>
+      {% endfor %}
+    </div>
+
+  {% when "checkbox" %}
+    <span class="label">{{ label }}</span>
+    <div class="opts">
+      <label>
+        <input type="checkbox" name="{{ include.name }}"
+               {% if def %}checked{% endif %}>
+        {{ include.spec.checkbox_label | default: "on" }}
+      </label>
+    </div>
+
+  {% when "textarea" %}
+    <label>{{ label }}</label>
+    <textarea name="{{ include.name }}" rows="10"
+              {% if req %}required{% endif %}>{{ def }}</textarea>
+
+  {% else %}
+    <label>{{ label }}</label>
+    <input type="text" name="{{ include.name }}" value="{{ def }}">
+
+  {% endcase %}
+
+  {% if hint %}<span class="hint">{{ hint }}</span>{% endif %}
+</div>

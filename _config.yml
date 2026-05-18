@@ -1,0 +1,68 @@
+# CalCOFI Query — Jekyll site at https://calcofi.io/query/
+
+title:       "CalCOFI Query"
+description: "Browser-only DuckDB-WASM playground for the CalCOFI release Parquet on GCS."
+url:         "https://calcofi.io"
+baseurl:     "/query"
+markdown:    kramdown
+
+# The catalog: every file in _queries/<category>/<query>.md is one query.
+# Folder name = category header; file basename = query label.
+# `output: false` because we render every query into a single index.html as
+# its own <section>, not as a stand-alone page.
+collections:
+  queries:
+    output: false
+
+# Skip Liquid processing on _queries/ items so the `{{var}}` Handlebars
+# templates inside frontmatter `sql: |` (and the body Markdown) pass through
+# untouched — Liquid only interprets the index.html template that wraps them.
+defaults:
+  - scope:  { path: "", type: queries }
+    values:
+      render_with_liquid: false
+
+# Folder slug → display title for the sidebar accordion. Add a row here when
+# you add a new category folder; queries inherit a hyphen→space conversion
+# for their own labels.
+category_titles:
+  quick-facts:       "Quick facts"
+  browse:            "Browse"
+  spatial:           "Spatial"
+  temporal:          "Temporal"
+  datasets:          "Datasets"
+  bio-env-matching:  "Bio ↔ Env Matching"
+  sql-shell:         "SQL shell"
+
+# Category display order in the sidebar (easy → hard, so a first-time
+# visitor lands somewhere they can click Run without thinking).
+category_order:
+  - quick-facts
+  - browse
+  - spatial
+  - temporal
+  - datasets
+  - bio-env-matching
+  - sql-shell
+
+# Pinned release version — used as the default for the `version` parameter
+# on every query (each .md file can override). Bump when a new release lands.
+default_version: v2026.05.14
+
+# Pinned external lib versions used at runtime (kept here so updates are a
+# one-line PR rather than hunting across .js files).
+duckdb_wasm_version: 1.29.0
+handlebars_version:  4.7
+
+plugins:
+  - jekyll-relative-links
+
+exclude:
+  - README.md
+  - LICENSE
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - node_modules
+  - .bundle
+  - .jekyll-cache

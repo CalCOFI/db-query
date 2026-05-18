@@ -1,0 +1,115 @@
+---
+layout: default
+---
+
+{%- comment -%}
+  ────────────────────────────────────────────────────────────────────────
+  CalCOFI Query — single-page Jekyll-rendered shell.
+
+  The page is structured as <aside id="nav"> + <main id="panel">; the
+  layout (`_layouts/default.html`) splits this template on the
+  <!-- NAV --> marker.
+
+  Jekyll iterates `site.queries` (one .md per query, folder = category) to
+  build the accordion nav and one <section> per query. The runtime in
+  app.js just toggles section visibility and submits forms.
+  ────────────────────────────────────────────────────────────────────────
+{%- endcomment -%}
+
+{%- assign default_version = site.default_version -%}
+
+<ul class="nav-root">
+
+  {%- comment -%} Intro link (special; always first) {%- endcomment -%}
+  <li class="nav-intro">
+    <a href="#_intro" data-query="_intro">Intro</a>
+  </li>
+
+  {%- comment -%}
+    Iterate categories in the explicit `category_order` from _config.yml,
+    then any folders that happen to exist but aren't listed (defensive).
+  {%- endcomment -%}
+  {% assign seen_cats = "" | split: "" %}
+
+  {% for folder in site.category_order %}
+    {% assign items = site.queries
+                      | where_exp: "q", "q.path contains folder"
+                      | sort: "order" %}
+    {% if items.size > 0 %}
+      {% assign seen_cats = seen_cats | push: folder %}
+      <li>
+        <details open>
+          <summary>{{ site.category_titles[folder] | default: folder | replace: "-", " " }}</summary>
+          <ul>
+          {% for q in items %}
+            {% assign id   = q.path | split: "/" | last | replace: ".md", "" %}
+            {% assign hash = folder | append: "--" | append: id %}
+            <li><a href="#{{ hash }}" data-query="{{ hash }}">{{ q.label | default: id | replace: "-", " " }}</a></li>
+          {% endfor %}
+          </ul>
+        </details>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
+
+<!-- NAV -->
+
+<section id="intro-section" data-query-id="_intro">
+  <div id="intro-wrap">
+    {%- comment -%}
+      The intro is plain Markdown at the project root — Jekyll renders it
+      with kramdown, same as a query description.
+    {%- endcomment -%}
+    {% capture intro %}{% include_relative intro.md %}{% endcapture %}
+    {{ intro | markdownify }}
+  </div>
+</section>
+
+{% for q in site.queries %}
+  {% assign folder = q.path | split: "/" | slice: 1, 1 | first %}
+  {% assign id     = q.path | split: "/" | last | replace: ".md", "" %}
+  {% assign hash   = folder | append: "--" | append: id %}
+
+  <section data-query-id="{{ hash }}" hidden
+           data-category="{{ folder }}"
+           {% if q.sql_builder %}data-sql-builder="{{ q.sql_builder }}"{% endif %}>
+
+    <h2>
+      <span class="cat">{{ site.category_titles[folder] | default: folder | replace: "-", " " }}</span>
+      &nbsp;·&nbsp;
+      <span class="label">{{ q.label | default: id | replace: "-", " " }}</span>
+    </h2>
+
+    <div class="description">{{ q.content | markdownify }}</div>
+
+    {%- comment -%}
+      Render the form from `parameters`. If a query has no `parameters`
+      (e.g. Quick facts/release), the form is just a Run button.
+    {%- endcomment -%}
+    <form class="query-form{% unless q.parameters %} empty-fields{% endunless %}">
+      {% if q.parameters %}
+        {% for kv in q.parameters %}
+          {% assign p_name = kv[0] %}
+          {% assign p_spec = kv[1] %}
+          {% include form-field.html name=p_name spec=p_spec %}
+        {% endfor %}
+      {% endif %}
+      <div class="form-actions">
+        <button type="submit" class="run">Run</button>
+      </div>
+    </form>
+
+    {%- comment -%}
+      If the query specifies inline SQL (i.e. no `sql_builder`), embed it
+      as a <template> so the runtime can compile it with Handlebars on Run.
+      Note: `render_with_liquid: false` on the queries collection keeps the
+      `{{var}}` Handlebars syntax intact.
+    {%- endcomment -%}
+    {% if q.sql %}
+      <template class="sql-template">{{ q.sql }}</template>
+    {% endif %}
+  </section>
+{% endfor %}
+
+{% include result-panel.html %}
