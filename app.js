@@ -34,6 +34,46 @@ Handlebars.registerHelper("sqlList", (arr) => {
 const $  = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+// ─── Google Analytics ──────────────────────────────────────────────────
+// thin wrapper so the app keeps working when GA is blocked / fails to load.
+// gtag() is defined globally by _includes/google-analytics.html (in <head>).
+const ga = (name, params = {}) => {
+  if (typeof gtag === "function") {
+    try { gtag("event", name, params); } catch (_) { /* swallow */ }
+  }
+};
+
+// which form fields differ from their Jekyll-rendered defaults? returns
+// param names only — values can be huge (sql-shell textarea) and would
+// blow past GA4's 100-char string cap.
+function paramsChangedFromDefaults(form) {
+  const changed = [];
+  for (const el of form.elements) {
+    if (!el.name) continue;
+    if (el.type === "checkbox") {
+      if (el.checked !== el.defaultChecked) changed.push(el.name);
+    } else if (el.type === "radio") {
+      // a radio group is "changed" iff the currently-checked option isn't
+      // the default-checked one; count each group at most once
+      if (el.checked && !el.defaultChecked && !changed.includes(el.name))
+        changed.push(el.name);
+    } else if (el.tagName === "SELECT") {
+      const def = Array.from(el.options).find((o) => o.defaultSelected);
+      if (def && el.value !== def.value) changed.push(el.name);
+    } else {
+      if (el.value !== el.defaultValue) changed.push(el.name);
+    }
+  }
+  return changed;
+}
+
+// which query <section> is currently visible? used by the global download
+// buttons (which don't know which query produced the rows).
+const activeQueryId = () => {
+  const s = $$("[data-query-id]").find((x) => !x.hidden);
+  return s ? s.dataset.queryId : null;
+};
+
 // ─── status pill ────────────────────────────────────────────────────────
 const statusEl = $("#status");
 function setStatus(html, kind = "") {
@@ -87,6 +127,11 @@ function showQuery(hash) {
   if (location.hash.slice(1) !== hash) {
     history.replaceState(null, "", hash === "_intro" ? "#" : `#${hash}`);
   }
+
+  // GA: which query did the user navigate to? hash is `category--name`
+  // (or `_intro` on first paint / bad hash, which we still want to count).
+  const [category, label] = hash.includes("--") ? hash.split("--") : [hash, ""];
+  ga("query_view", { query_id: hash, category, label });
 }
 
 addEventListener("hashchange", () => showQuery(location.hash.slice(1)));
@@ -235,11 +280,16 @@ const SQL_HEADER = "-- Re-run in DuckDB (CLI, Python or R) against public CalCOF
                    "-- See https://calcofi.io/docs/data-access.html#reproducibility.\n" +
                    "INSTALL httpfs; LOAD httpfs;\nINSTALL spatial; LOAD spatial;\n\n";
 
-$("#dl-csv").addEventListener("click",  () =>
-  download(`calcofi_query_${Date.now()}.csv`, "text/csv", rowsToCSV(state.cols, state.rows)));
-$("#dl-sql").addEventListener("click",  () =>
-  download(`calcofi_query_${Date.now()}.sql`, "text/plain", SQL_HEADER + state.sql + "\n"));
+$("#dl-csv").addEventListener("click",  () => {
+  ga("download", { query_id: activeQueryId(), kind: "csv" });
+  download(`calcofi_query_${Date.now()}.csv`, "text/csv", rowsToCSV(state.cols, state.rows));
+});
+$("#dl-sql").addEventListener("click",  () => {
+  ga("download", { query_id: activeQueryId(), kind: "sql" });
+  download(`calcofi_query_${Date.now()}.sql`, "text/plain", SQL_HEADER + state.sql + "\n");
+});
 $("#copy-sql").addEventListener("click", async () => {
+  ga("download", { query_id: activeQueryId(), kind: "copy_sql" });
   await navigator.clipboard.writeText(SQL_HEADER + state.sql + "\n");
   const btn = $("#copy-sql"), prev = btn.textContent;
   btn.textContent = "✓ copied"; setTimeout(() => { btn.textContent = prev; }, 1200);
@@ -250,6 +300,17 @@ async function runQuery(section, form) {
   const args = readForm(form);
   const submitBtn = form.querySelector("button[type=submit]");
   submitBtn.disabled = true;
+
+  // GA: record the run + which knobs were turned (names only; see helper).
+  const queryId        = section.dataset.queryId;
+  const paramNames     = Array.from(form.elements).map((e) => e.name).filter(Boolean);
+  const changedParams  = paramsChangedFromDefaults(form);
+  ga("query_run", {
+    query_id:         queryId,
+    release_version:  args.version || null,
+    n_params_changed: changedParams.length,
+    params_changed:   changedParams.join(",").slice(0, 100),
+    params_total:     new Set(paramNames).size });
 
   // Build SQL — two paths:
   //   (a) section has a `data-sql-builder` → delegate to lib/match.js
@@ -281,6 +342,10 @@ async function runQuery(section, form) {
     }
   } catch (err) {
     setStatus(`✗ SQL build failed: ${esc(err.message)}`, "error");
+    ga("query_error", {
+      query_id:      queryId,
+      error_stage:   "sql_build",
+      error_message: String(err.message || err).slice(0, 100) });
     submitBtn.disabled = false;
     return;
   }
@@ -292,6 +357,10 @@ async function runQuery(section, form) {
     conn = await getConn();
   } catch (err) {
     setStatus(`✗ DuckDB-WASM init failed: ${esc(err.message)}`, "error");
+    ga("query_error", {
+      query_id:      queryId,
+      error_stage:   "duckdb_init",
+      error_message: String(err.message || err).slice(0, 100) });
     submitBtn.disabled = false;
     return;
   }
@@ -315,8 +384,17 @@ async function runQuery(section, form) {
     $("#meta-text").textContent = JSON.stringify(state.meta, null, 2);
     renderTable();
     setStatus(`✓ Done: ${rows.length} row${rows.length === 1 ? "" : "s"} in ${sec}s`, "success");
+    ga("query_success", {
+      query_id:     queryId,
+      n_rows:       rows.length,
+      n_cols:       cols.length,
+      duration_sec: Number(sec) });
   } catch (err) {
     setStatus(`✗ Query failed: ${esc(err.message)}`, "error");
+    ga("query_error", {
+      query_id:      queryId,
+      error_stage:   "duckdb_run",
+      error_message: String(err.message || err).slice(0, 100) });
     // surface the SQL so the user can see what failed
     state.sql = sql; state.meta = queryMeta;
     $("#result").hidden = false;
