@@ -18,11 +18,11 @@ parameters:
         sp.scientific_name,
         i.life_stage,
         i.tally
-      FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/v2026.05.14/parquet/ichthyo.parquet') i
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/v2026.05.14/parquet/species.parquet') sp ON i.species_id = sp.species_id
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/v2026.05.14/parquet/net.parquet')     n  ON i.net_uuid   = n.net_uuid
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/v2026.05.14/parquet/tow.parquet')     t  ON n.tow_uuid   = t.tow_uuid
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/v2026.05.14/parquet/site.parquet')    s  ON t.site_uuid  = s.site_uuid
+      FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/ichthyo.parquet') i
+      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/species.parquet') sp ON i.species_id = sp.species_id
+      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/net.parquet')     n  ON i.net_uuid   = n.net_uuid
+      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/tow.parquet')     t  ON n.tow_uuid   = t.tow_uuid
+      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/site.parquet')    s  ON t.site_uuid  = s.site_uuid
       WHERE i.tally IS NOT NULL
         AND i.measurement_type IS NULL
         AND sp.scientific_name = 'Sardinops sagax'
@@ -42,9 +42,9 @@ parameters:
         bm.measurement_value     AS env_value,
         b.depth_m                AS env_depth_m,
         bm.measurement_type      AS measurement_type
-      FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/v2026.05.14/parquet/bottle_measurement.parquet') bm
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/v2026.05.14/parquet/bottle.parquet') b ON bm.bottle_id = b.bottle_id
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/v2026.05.14/parquet/casts.parquet')  c ON b.cast_id    = c.cast_id
+      FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/bottle_measurement.parquet') bm
+      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/bottle.parquet') b ON bm.bottle_id = b.bottle_id
+      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/casts.parquet')  c ON b.cast_id    = c.cast_id
       WHERE bm.measurement_type = 'temperature'
         AND bm.measurement_value IS NOT NULL
         AND c.datetime_utc BETWEEN TIMESTAMP '2018-01-01' - INTERVAL '72 hours'

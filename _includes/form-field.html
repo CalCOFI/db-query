@@ -14,12 +14,22 @@
 {% assign hint   = include.spec.hint %}
 
 {%- comment -%}
-  Special case: the `version` parameter always reflects the current
-  promoted release from `_config.yml:default_version` (maintained by
-  .github/workflows/bump-default-version.yml polling GCS latest.txt).
-  Per-query YAML defaults are ignored to avoid query files going stale
-  every release.
+  `_config.yml:default_version` (maintained by
+  .github/workflows/bump-default-version.yml polling GCS latest.txt)
+  is the single source of truth for "current release". Apply it two
+  ways so query files don't go stale every release:
+
+  1. `__VERSION__` placeholder — anywhere in any default (typically
+     embedded in `read_parquet('...releases/__VERSION__/parquet/...')`
+     URLs inside textarea defaults) gets substituted at render time.
+
+  2. The `version` parameter itself — whatever YAML default the query
+     declares, the form field is always pre-filled with
+     `site.default_version`.
 {%- endcomment -%}
+{% if site.default_version %}
+  {% assign def = def | replace: "__VERSION__", site.default_version %}
+{% endif %}
 {% if include.name == "version" and site.default_version %}
   {% assign def = site.default_version %}
 {% endif %}
