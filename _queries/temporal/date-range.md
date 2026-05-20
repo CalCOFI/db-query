@@ -18,7 +18,7 @@ parameters:
 sql: |
   SELECT
     cast_id,
-    cruise_key_0          AS cruise_key,
+    cruise_key,
     datetime_utc,
     lon_dec,
     lat_dec,
