@@ -27,7 +27,7 @@ parameters:
 sql: |
   SELECT
     c.datetime_utc,
-    c.cruise_key_0  AS cruise_key,
+    c.cruise_key,
     c.site_key,
     c.lon_dec,
     c.lat_dec,
