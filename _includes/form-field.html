@@ -12,6 +12,17 @@
 {% assign label  = include.spec.label | default: include.name %}
 {% assign def    = include.spec.default %}
 {% assign hint   = include.spec.hint %}
+
+{%- comment -%}
+  Special case: the `version` parameter always reflects the current
+  promoted release from `_config.yml:default_version` (maintained by
+  .github/workflows/bump-default-version.yml polling GCS latest.txt).
+  Per-query YAML defaults are ignored to avoid query files going stale
+  every release.
+{%- endcomment -%}
+{% if include.name == "version" and site.default_version %}
+  {% assign def = site.default_version %}
+{% endif %}
 {% assign req    = include.spec.required %}
 {% assign opts   = include.spec.options %}
 {% assign opts_from = include.spec.options_from %}
