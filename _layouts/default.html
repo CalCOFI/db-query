@@ -26,6 +26,7 @@
 <div id="layout">
 
   <header class="app-header">
+    <button id="nav-toggle" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">☰</button>
     <a class="app-logo" href="{{ '/' | relative_url }}" aria-label="CalCOFI Query — home">
       {%- comment -%}
         Two SVGs, one per theme — the active one is shown via CSS rules in style.css
@@ -39,7 +40,7 @@
     </a>
     <h1>{{ site.title }}</h1>
     <span class="release">
-      release&nbsp;<a id="release-link" href="https://storage.googleapis.com/calcofi-db/ducklake/releases/{{ site.default_version }}/RELEASE_NOTES.md">{{ site.default_version }}</a>
+      release&nbsp;<a id="release-link" href="https://calcofi.io/schema/#erd?v={{ site.default_version }}" title="Browse the {{ site.default_version }} schema (tables, columns, measurements)">{{ site.default_version }}</a>
     </span>
     <span class="spacer"></span>
     <span id="status">Ready — pick a query and click Run.</span>
@@ -58,7 +59,8 @@
           · Engine · <a href="https://duckdb.org/docs/api/wasm/overview.html">DuckDB-WASM</a>
           v{{ site.duckdb_wasm_version }}
           · Data · <a href="https://storage.googleapis.com/calcofi-db/ducklake/releases/">public Parquet on GCS</a>
-          · See also · <a href="https://calcofi.io/docs/">CalCOFI docs</a> ·
+          · See also · <a href="https://calcofi.io/schema/">schema</a> ·
+          <a href="https://calcofi.io/docs/">CalCOFI docs</a> ·
           <a href="https://calcofi.io/calcofi4r/">calcofi4r</a>
         </p>
       </footer>

@@ -149,6 +149,18 @@ $("#theme-toggle").addEventListener("click", () => {
   localStorage.setItem("theme", next);
 });
 
+// ─── sidebar collapse toggle ────────────────────────────────────────────
+// state lives on #layout[data-nav-collapsed]; CSS at #body grid + aside#nav
+const layoutEl = $("#layout");
+if (localStorage.getItem("nav-collapsed") === "true") {
+  layoutEl.dataset.navCollapsed = "true";
+}
+$("#nav-toggle").addEventListener("click", () => {
+  const next = layoutEl.dataset.navCollapsed === "true" ? "false" : "true";
+  layoutEl.dataset.navCollapsed = next;
+  localStorage.setItem("nav-collapsed", next);
+});
+
 // ─── populate <select> options from dynamic sources ─────────────────────
 // (Runs once per (source, version); cached. Triggered on first focus of a
 // section's form so we don't fire 4+ GCS queries on initial page load.)

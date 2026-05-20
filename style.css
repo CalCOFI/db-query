@@ -103,13 +103,15 @@ header.app-header #status {
 header.app-header #status.busy    { border-left-color: var(--warn);    color: var(--fg); }
 header.app-header #status.success { border-left-color: var(--success); color: var(--fg); }
 header.app-header #status.error   { border-left-color: var(--error);   color: var(--error); }
-header.app-header button#theme-toggle {
+header.app-header button#theme-toggle,
+header.app-header button#nav-toggle {
   background: transparent; border: 1px solid var(--border);
   color: var(--fg); font: inherit; cursor: pointer;
   border-radius: 4px;
   padding: 0.2rem 0.55rem;
 }
-header.app-header button#theme-toggle:hover { background: var(--panel-2); }
+header.app-header button#theme-toggle:hover,
+header.app-header button#nav-toggle:hover { background: var(--panel-2); }
 
 /* ── two-column body ─────────────────────────────────────────────────────── */
 
@@ -118,6 +120,8 @@ header.app-header button#theme-toggle:hover { background: var(--panel-2); }
   grid-template-columns: 260px 1fr;
   min-height: 0; /* let main scroll independently */
 }
+#layout[data-nav-collapsed="true"] #body { grid-template-columns: 1fr; }
+#layout[data-nav-collapsed="true"] aside#nav { display: none; }
 @media (max-width: 720px) {
   #body { grid-template-columns: 1fr; }
   aside#nav { display: none; }

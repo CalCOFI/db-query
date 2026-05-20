@@ -68,6 +68,7 @@ and the
 
 ## Where to read more
 
+- [**Schema browser**](https://calcofi.io/schema/) — ERD, table/column descriptions, units, measurement-type registry for every release. Use it to pick which columns to project before writing a query.
 - [**Data Access**](https://calcofi.io/docs/data-access.html) — direct DuckDB + GCS Parquet querying (R, Python, this app)
 - [**Matching Helpers**](https://calcofi.io/docs/helpers.html) — the `calcofi4r` R-package wrappers
 - [**`calcofi4r` reference**](https://calcofi.io/calcofi4r/reference/index.html) — the R API
