@@ -26,11 +26,11 @@ parameters:
     default: v2026.05.14
 sql: |
   SELECT
-    c.datetime_utc,
+    c.datetime_start_utc,
     c.cruise_key,
     c.site_key,
-    c.lon_dec,
-    c.lat_dec,
+    c.longitude,
+    c.latitude,
     b.depth_m,
     bm.measurement_type,
     bm.measurement_value,
@@ -41,8 +41,8 @@ sql: |
   WHERE bm.measurement_type = '{{sqlesc env_var}}'
     AND bm.measurement_value IS NOT NULL
     AND b.depth_m BETWEEN {{depth_m_min}} AND {{depth_m_max}}
-    AND c.datetime_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
-  ORDER BY c.datetime_utc, b.depth_m
+    AND c.datetime_start_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
+  ORDER BY c.datetime_start_utc, b.depth_m
   {{#if limit}}LIMIT {{limit}}{{/if}};
 ---
 

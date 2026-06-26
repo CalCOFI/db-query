@@ -27,14 +27,14 @@ sql: |
     sp.scientific_name,
     sp.common_name,
     i.life_stage,
-    t.time_start            AS bio_datetime,
+    t.datetime_start_utc            AS bio_datetime,
     s.longitude             AS bio_lon,
     s.latitude              AS bio_lat,
     i.tally                 AS raw_tally,
-    n.std_haul_factor * i.tally / nullif(n.prop_sorted, 0) AS std_tally,
-    n.std_haul_factor,
+    n.standard_haul_factor * i.tally / nullif(n.prop_sorted, 0) AS std_tally,
+    n.standard_haul_factor,
     n.prop_sorted,
-    n.vol_sampled_m3
+    n.volume_sampled
   FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/ichthyo.parquet') i
   JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/species.parquet') sp ON i.species_id = sp.species_id
   JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/net.parquet')     n  ON i.net_uuid   = n.net_uuid
@@ -44,14 +44,14 @@ sql: |
     AND i.measurement_type IS NULL
     {{#if scientific_name}}AND sp.scientific_name = '{{sqlesc scientific_name}}'{{/if}}
     {{#if life_stage}}AND i.life_stage = '{{sqlesc life_stage}}'{{/if}}
-    AND t.time_start BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
-  ORDER BY t.time_start
+    AND t.datetime_start_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
+  ORDER BY t.datetime_start_utc
   {{#if limit}}LIMIT {{limit}}{{/if}};
 ---
 
 **Single-table** ichthyoplankton — net-tow counts joined to species, net,
 tow, and site, no environmental match. `std_tally` is the standardized
-catch-per-effort: `std_haul_factor × tally / prop_sorted`.
+catch-per-effort: `standard_haul_factor × tally / prop_sorted`.
 
 For the same observations **matched to CTD-bottle measurements** (one
 `env_value` per row), see **Bio ↔ Env Matching → by name**.

@@ -32,21 +32,21 @@ sql: |
     cast_id,
     cruise_key,
     site_key,
-    datetime_utc,
-    lon_dec,
-    lat_dec,
+    datetime_start_utc,
+    longitude,
+    latitude,
     bottom_depth_m,
     ship_name
   FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/casts.parquet')
-  WHERE lon_dec BETWEEN {{lon_min}} AND {{lon_max}}
-    AND lat_dec BETWEEN {{lat_min}} AND {{lat_max}}
-    AND datetime_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
-  ORDER BY datetime_utc
+  WHERE longitude BETWEEN {{lon_min}} AND {{lon_max}}
+    AND latitude BETWEEN {{lat_min}} AND {{lat_max}}
+    AND datetime_start_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
+  ORDER BY datetime_start_utc
   {{#if limit}}LIMIT {{limit}}{{/if}};
 ---
 
 CTD casts whose decimal lon/lat fall inside the bounding box and whose
-`datetime_utc` falls in the date range. Pasted straight from the CalCOFI
+`datetime_start_utc` falls in the date range. Pasted straight from the CalCOFI
 sampling grid: defaults (-125 to -117 lon, 30 to 38 lat) cover the full
 historical pattern from Pt. Conception south to Baja and out to ~Sta. 60.
 

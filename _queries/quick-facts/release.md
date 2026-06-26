@@ -14,8 +14,8 @@ sql: |
     species_n     AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/species.parquet')),
     ichthyo_n     AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/ichthyo.parquet')),
     bottle_meas_n AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/bottle_measurement.parquet')),
-    bio_date_rng  AS (SELECT min(time_start)::VARCHAR AS d0, max(time_start)::VARCHAR AS d1 FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/tow.parquet')),
-    env_date_rng  AS (SELECT min(datetime_utc)::VARCHAR AS d0, max(datetime_utc)::VARCHAR AS d1 FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/casts.parquet'))
+    bio_date_rng  AS (SELECT min(datetime_start_utc)::VARCHAR AS d0, max(datetime_start_utc)::VARCHAR AS d1 FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/tow.parquet')),
+    env_date_rng  AS (SELECT min(datetime_start_utc)::VARCHAR AS d0, max(datetime_start_utc)::VARCHAR AS d1 FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/casts.parquet'))
   SELECT  'release_version'  AS metric,  '{{version}}'                  AS value UNION ALL
   SELECT  'cruises',          (SELECT n::VARCHAR FROM cruise_n)         UNION ALL
   SELECT  'casts',            (SELECT n::VARCHAR FROM cast_n)           UNION ALL
@@ -31,7 +31,7 @@ sql: |
 Headline counts and date ranges from the pinned release. A 9-row scorecard:
 
 - **cruises** · **casts** · **species** · **ichthyo_rows** · **bottle_measurements** — table-level row counts.
-- **bio_date_start / bio_date_end** — net-tow temporal coverage (`tow.time_start`).
-- **env_date_start / env_date_end** — CTD-bottle env coverage (`casts.datetime_utc`). The gap between this and the bio coverage is why the bio↔env matching examples use 2018 dates.
+- **bio_date_start / bio_date_end** — net-tow temporal coverage (`tow.datetime_start_utc`).
+- **env_date_start / env_date_end** — CTD-bottle env coverage (`casts.datetime_start_utc`). The gap between this and the bio coverage is why the bio↔env matching examples use 2018 dates.
 
 Each `read_parquet()` URL is bound to `version` — change it and the whole scorecard refreshes against that release. See available releases on [GCS](https://storage.googleapis.com/calcofi-db/ducklake/releases/) (one folder per release).
