@@ -19,12 +19,12 @@ sql: |
   WITH cruise_casts AS (
     SELECT
       cruise_key,
-      min(datetime_utc) AS date_start,
-      max(datetime_utc) AS date_end,
+      min(datetime_start_utc) AS date_start,
+      max(datetime_start_utc) AS date_end,
       any_value(ship_name) AS ship_name,
       count(*) AS n_casts
     FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/casts.parquet')
-    WHERE datetime_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
+    WHERE datetime_start_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
     GROUP BY cruise_key
   )
   SELECT *
@@ -33,7 +33,7 @@ sql: |
   {{#if limit}}LIMIT {{limit}}{{/if}};
 ---
 
-One row per CalCOFI cruise, filtered by the cast `datetime_utc` falling in
+One row per CalCOFI cruise, filtered by the cast `datetime_start_utc` falling in
 your date range. Columns: `cruise_key` (`YYYY-MM-NODC` natural key — see
 [Database](https://calcofi.io/docs/db.html)), date span, ship name, number
 of casts.

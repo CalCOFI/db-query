@@ -11,10 +11,10 @@ parameters:
     default: |
       SELECT
         i.ichthyo_uuid::VARCHAR AS bio_id,
-        t.time_start            AS bio_datetime,
+        t.datetime_start_utc            AS bio_datetime,
         s.longitude             AS bio_lon,
         s.latitude              AS bio_lat,
-        n.std_haul_factor * i.tally / nullif(n.prop_sorted, 0) AS bio_value,
+        n.standard_haul_factor * i.tally / nullif(n.prop_sorted, 0) AS bio_value,
         sp.scientific_name,
         i.life_stage,
         i.tally
@@ -27,7 +27,7 @@ parameters:
         AND i.measurement_type IS NULL
         AND sp.scientific_name = 'Sardinops sagax'
         AND i.life_stage = 'larva'
-        AND t.time_start BETWEEN TIMESTAMP '2018-01-01' AND TIMESTAMP '2018-03-31'
+        AND t.datetime_start_utc BETWEEN TIMESTAMP '2018-01-01' AND TIMESTAMP '2018-03-31'
   env:
     type: textarea
     label: "env (SELECT string)"
@@ -36,9 +36,9 @@ parameters:
     default: |
       SELECT
         bm.bottle_measurement_id AS env_id,
-        c.datetime_utc           AS env_datetime,
-        c.lon_dec                AS env_lon,
-        c.lat_dec                AS env_lat,
+        c.datetime_start_utc           AS env_datetime,
+        c.longitude                AS env_lon,
+        c.latitude                AS env_lat,
         bm.measurement_value     AS env_value,
         b.depth_m                AS env_depth_m,
         bm.measurement_type      AS measurement_type
@@ -47,7 +47,7 @@ parameters:
       JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/casts.parquet')  c ON b.cast_id    = c.cast_id
       WHERE bm.measurement_type = 'temperature'
         AND bm.measurement_value IS NOT NULL
-        AND c.datetime_utc BETWEEN TIMESTAMP '2018-01-01' - INTERVAL '72 hours'
+        AND c.datetime_start_utc BETWEEN TIMESTAMP '2018-01-01' - INTERVAL '72 hours'
                               AND TIMESTAMP '2018-03-31' + INTERVAL '72 hours'
   max_dist_km:
     type: number
