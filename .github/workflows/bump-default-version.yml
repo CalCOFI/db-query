@@ -1,11 +1,11 @@
 name: Bump default_version from GCS latest.txt
 
 on:
-  schedule:
-    # every 6 hours; release_database.qmd is a manual run, so this is the
-    # polling cadence between successful test_release.qmd promotions and the
-    # site picking up the new default
-    - cron: "0 */6 * * *"
+  # dispatched by CalCOFI/workflows test_release.qmd immediately after it
+  # promotes a release to latest.txt (i.e. only once every pre-baked query has
+  # passed against that release). No cron poll — the bump is event-driven so the
+  # site adopts the new default_version within minutes, never pointing at a
+  # release whose queries haven't been validated.
   workflow_dispatch:
 
 permissions:
@@ -47,8 +47,6 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add _config.yml
-          git commit -m "Bump default_version to $latest
-
-Promoted by GCS latest.txt (set after a successful test_release.qmd run
-in CalCOFI/workflows)."
+          git commit -m "Bump default_version to $latest" \
+                     -m "Promoted by GCS latest.txt (set after a successful test_release.qmd run in CalCOFI/workflows)."
           git push origin main
