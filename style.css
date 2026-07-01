@@ -1,7 +1,7 @@
 /* CalCOFI Query — style.css
    Dark default theme; light theme is a 12-line `:root[data-theme="light"]`
    override at the bottom. Palette echoes Bootswatch *darkly* (the
-   CalCOFI.github.io umbrella) and reads as a cousin of int-app / ctd-viz. */
+   CalCOFI.github.io umbrella) and reads as a cousin of db-viz-hex / ctd-viz. */
 
 :root {
   --bg:       #1b1d20;

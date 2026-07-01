@@ -28,7 +28,7 @@ jobs:
       - uses: actions/configure-pages@v5
 
       - name: Build with Jekyll
-        run: bundle exec jekyll build --baseurl "/query"
+        run: bundle exec jekyll build --baseurl "/db-query"
         env:
           JEKYLL_ENV: production
 

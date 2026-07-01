@@ -3,7 +3,7 @@
 A browser-only DuckDB-WASM playground for the public
 [CalCOFI release Parquet on Google Cloud Storage](https://storage.googleapis.com/calcofi-db/ducklake/releases/).
 
-**Live:** <https://calcofi.io/query/>
+**Live:** <https://calcofi.io/db-query/>
 
 Pick a query in the left-side accordion, fill the form, click **Run**. The
 SQL runs in your browser — no server, no credentials, no install. Same
@@ -140,11 +140,11 @@ returns `{ sql, queryMeta }`. The four currently-exported builders are
 
 ```sh
 bundle install
-bundle exec jekyll serve     # → http://localhost:4000/query/
+bundle exec jekyll serve     # → http://localhost:4000/db-query/
 ```
 
 Or just push to `main` — GitHub Pages builds Jekyll automatically and the
-site is live at `https://calcofi.io/query/` in ~1 min.
+site is live at `https://calcofi.io/db-query/` in ~1 min.
 
 ## Caveats
 

@@ -1,9 +1,9 @@
-# CalCOFI Query — Jekyll site at https://calcofi.io/query/
+# CalCOFI Query — Jekyll site at https://calcofi.io/db-query/
 
 title:       "CalCOFI Query"
 description: "Browser-only DuckDB-WASM playground for the CalCOFI release Parquet on GCS."
 url:         "https://calcofi.io"
-baseurl:     "/query"
+baseurl:     "/db-query"
 markdown:    kramdown
 
 # The catalog: every file in _queries/<category>/<query>.md is one query.

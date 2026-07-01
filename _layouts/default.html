@@ -40,7 +40,7 @@
     </a>
     <h1>{{ site.title }}</h1>
     <span class="release">
-      release&nbsp;<a id="release-link" href="https://calcofi.io/schema/#erd?v={{ site.default_version }}" title="Browse the {{ site.default_version }} schema (tables, columns, measurements)">{{ site.default_version }}</a>
+      release&nbsp;<a id="release-link" href="https://calcofi.io/db-schema/#erd?v={{ site.default_version }}" title="Browse the {{ site.default_version }} schema (tables, columns, measurements)">{{ site.default_version }}</a>
     </span>
     <span class="spacer"></span>
     <span id="status">Ready — pick a query and click Run.</span>
@@ -55,11 +55,11 @@
       {{ content | split: "<!-- NAV -->" | last }}
       <footer class="app-footer">
         <p>
-          Source · <a href="https://github.com/CalCOFI/query">CalCOFI/query</a>
+          Source · <a href="https://github.com/CalCOFI/db-query">CalCOFI/db-query</a>
           · Engine · <a href="https://duckdb.org/docs/api/wasm/overview.html">DuckDB-WASM</a>
           v{{ site.duckdb_wasm_version }}
           · Data · <a href="https://storage.googleapis.com/calcofi-db/ducklake/releases/">public Parquet on GCS</a>
-          · See also · <a href="https://calcofi.io/schema/">schema</a> ·
+          · See also · <a href="https://calcofi.io/db-schema/">schema</a> ·
           <a href="https://calcofi.io/docs/">CalCOFI docs</a> ·
           <a href="https://calcofi.io/calcofi4r/">calcofi4r</a>
         </p>

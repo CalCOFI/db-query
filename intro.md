@@ -68,11 +68,11 @@ and the
 
 ## Where to read more
 
-- [**Schema browser**](https://calcofi.io/schema/) — ERD, table/column descriptions, units, measurement-type registry for every release. Use it to pick which columns to project before writing a query.
+- [**Schema browser**](https://calcofi.io/db-schema/) — ERD, table/column descriptions, units, measurement-type registry for every release. Use it to pick which columns to project before writing a query.
 - [**Data Access**](https://calcofi.io/docs/data-access.html) — direct DuckDB + GCS Parquet querying (R, Python, this app)
 - [**Matching Helpers**](https://calcofi.io/docs/helpers.html) — the `calcofi4r` R-package wrappers
 - [**`calcofi4r` reference**](https://calcofi.io/calcofi4r/reference/index.html) — the R API
 - [**Bio ↔ Env Matching vignette**](https://calcofi.io/calcofi4r/articles/bio-env-matching.html) — the worked example, faceted maps + scatter, the 2014–2019 marine heatwave
 - [**API → replacement reference**](https://calcofi.io/docs/api.html) — old Plumber endpoints ↔ this app
-- [**How to add a new query**](https://github.com/CalCOFI/query#adding-a-query) — drop a `.md` in the right folder
-- **Source** for this app — [github.com/CalCOFI/query](https://github.com/CalCOFI/query)
+- [**How to add a new query**](https://github.com/CalCOFI/db-query#adding-a-query) — drop a `.md` in the right folder
+- **Source** for this app — [github.com/CalCOFI/db-query](https://github.com/CalCOFI/db-query)

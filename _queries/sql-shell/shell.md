@@ -24,7 +24,7 @@ Useful for:
 
 - Ad-hoc queries the other forms don't cover
 - Trying out a SQL pattern before turning it into a permanent query (drop a
-  `.md` file in [the right `_queries/` subfolder](https://github.com/CalCOFI/query#adding-a-query))
+  `.md` file in [the right `_queries/` subfolder](https://github.com/CalCOFI/db-query#adding-a-query))
 - Joining tables that aren't paired in the named queries — e.g. `taxa_rank`,
   `cast_condition`, `_spatial`, `dic_*`
 
