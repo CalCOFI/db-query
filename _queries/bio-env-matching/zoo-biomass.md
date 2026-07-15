@@ -43,10 +43,11 @@ parameters:
     default: v2026.05.14
 ---
 
-Net-tow **displacement-volume biomass** matched to CTD-bottle measurements.
-Biomass comes from the `net.totalplankton` / `net.smallplankton` columns
-(mL per net haul); the env side is the same `bottle_measurement` ⋈ `bottle`
-⋈ `casts` chain as the other bio↔env queries.
+Net-tow **displacement-volume biomass** matched to environmental measurements.
+Biomass comes from the `total_plankton_biomass` / `small_plankton_biomass`
+measurement types in `sample_measurement` (mL per net haul, joined to `sample`
+for position + time); the env side is the same consolidated `obs` table
+(`realm = 'env'`) as the other bio↔env queries.
 
 Replaces the retired
 [`/zooplankton_biomass`](https://api.calcofi.io) Plumber endpoint. Mirrors

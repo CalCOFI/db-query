@@ -10,24 +10,24 @@ parameters:
     hint: "must yield bio_id, bio_datetime, bio_lon, bio_lat, bio_value (+ optional descriptive columns)"
     default: |
       SELECT
-        i.ichthyo_uuid::VARCHAR AS bio_id,
-        t.datetime_start_utc            AS bio_datetime,
-        s.longitude             AS bio_lon,
-        s.latitude              AS bio_lat,
-        n.standard_haul_factor * i.tally / nullif(n.prop_sorted, 0) AS bio_value,
+        o.obs_id::VARCHAR AS bio_id,
+        o.datetime AS bio_datetime,
+        o.longitude AS bio_lon,
+        o.latitude AS bio_lat,
+        o.measurement_value * shf.measurement_value / nullif(ps.measurement_value, 0) AS bio_value,
+        o.measurement_value AS tally,
         sp.scientific_name,
-        i.life_stage,
-        i.tally
-      FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/ichthyo.parquet') i
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/species.parquet') sp ON i.species_id = sp.species_id
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/net.parquet')     n  ON i.net_uuid   = n.net_uuid
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/tow.parquet')     t  ON n.tow_uuid   = t.tow_uuid
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/site.parquet')    s  ON t.site_uuid  = s.site_uuid
-      WHERE i.tally IS NOT NULL
-        AND i.measurement_type IS NULL
+        o.life_stage
+      FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/obs.parquet') o
+      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/species.parquet') sp ON CAST(o.taxon_id AS INTEGER) = sp.species_id
+      LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/sample_measurement.parquet') shf ON shf.sample_key = o.sample_key AND shf.measurement_type = 'std_haul_factor'
+      LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/sample_measurement.parquet') ps ON ps.sample_key = o.sample_key AND ps.measurement_type = 'prop_sorted'
+      WHERE o.realm = 'bio'
+        AND o.dataset_key = 'swfsc_ichthyo'
+        AND o.measurement_type = 'abundance'
         AND sp.scientific_name = 'Sardinops sagax'
-        AND i.life_stage = 'larva'
-        AND t.datetime_start_utc BETWEEN TIMESTAMP '2018-01-01' AND TIMESTAMP '2018-03-31'
+        AND o.life_stage = 'larva'
+        AND o.datetime BETWEEN TIMESTAMP '2018-01-01' AND TIMESTAMP '2018-03-31'
   env:
     type: textarea
     label: "env (SELECT string)"
@@ -35,20 +35,19 @@ parameters:
     hint: "must yield env_id, env_datetime, env_lon, env_lat, env_value, env_depth_m, measurement_type"
     default: |
       SELECT
-        bm.bottle_measurement_id AS env_id,
-        c.datetime_start_utc           AS env_datetime,
-        c.longitude                AS env_lon,
-        c.latitude                AS env_lat,
-        bm.measurement_value     AS env_value,
-        b.depth_m                AS env_depth_m,
-        bm.measurement_type      AS measurement_type
-      FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/bottle_measurement.parquet') bm
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/bottle.parquet') b ON bm.bottle_id = b.bottle_id
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/casts.parquet')  c ON b.cast_id    = c.cast_id
-      WHERE bm.measurement_type = 'temperature'
-        AND bm.measurement_value IS NOT NULL
-        AND c.datetime_start_utc BETWEEN TIMESTAMP '2018-01-01' - INTERVAL '72 hours'
-                              AND TIMESTAMP '2018-03-31' + INTERVAL '72 hours'
+        obs_id AS env_id,
+        datetime AS env_datetime,
+        longitude AS env_lon,
+        latitude AS env_lat,
+        measurement_value AS env_value,
+        depth_min_m AS env_depth_m,
+        measurement_type AS measurement_type
+      FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/obs.parquet')
+      WHERE realm = 'env'
+        AND measurement_type = 'temperature'
+        AND measurement_value IS NOT NULL
+        AND datetime BETWEEN TIMESTAMP '2018-01-01' - INTERVAL '72 hours'
+                         AND TIMESTAMP '2018-03-31' + INTERVAL '72 hours'
   max_dist_km:
     type: number
     default: 5
