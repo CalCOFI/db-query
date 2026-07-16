@@ -26,22 +26,23 @@ parameters:
     hint: "0 for all rows"
   version:
     type: text
-    default: v2026.05.14
+    default: v2026.07.16
 sql: |
   SELECT
-    cast_id,
-    cruise_key,
-    site_key,
-    datetime_start_utc,
-    longitude,
-    latitude,
-    bottom_depth_m,
-    ship_name
-  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/casts.parquet')
-  WHERE longitude BETWEEN {{lon_min}} AND {{lon_max}}
-    AND latitude BETWEEN {{lat_min}} AND {{lat_max}}
-    AND datetime_start_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
-  ORDER BY datetime_start_utc
+    s.sample_key        AS cast_key,
+    s.cruise_key,
+    s.grid_key,
+    s.datetime          AS datetime_start_utc,
+    s.longitude,
+    s.latitude,
+    cr.ship_name
+  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/sample.parquet') s
+  LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/cruise.parquet') cr USING (cruise_key)
+  WHERE s.dataset_key = 'calcofi_bottle' AND s.sample_type = 'cast'
+    AND s.longitude BETWEEN {{lon_min}} AND {{lon_max}}
+    AND s.latitude BETWEEN {{lat_min}} AND {{lat_max}}
+    AND s.datetime BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
+  ORDER BY s.datetime
   {{#if limit}}LIMIT {{limit}}{{/if}};
 ---
 

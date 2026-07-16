@@ -16,16 +16,16 @@ parameters:
         o.latitude AS bio_lat,
         o.measurement_value * shf.measurement_value / nullif(ps.measurement_value, 0) AS bio_value,
         o.measurement_value AS tally,
-        sp.scientific_name,
+        t.scientific_name,
         o.life_stage
       FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/obs.parquet') o
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/species.parquet') sp ON CAST(o.taxon_id AS INTEGER) = sp.species_id
+      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/taxon.parquet') t ON t.taxon_key = o.taxon_key
       LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/sample_measurement.parquet') shf ON shf.sample_key = o.sample_key AND shf.measurement_type = 'std_haul_factor'
       LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/sample_measurement.parquet') ps ON ps.sample_key = o.sample_key AND ps.measurement_type = 'prop_sorted'
       WHERE o.realm = 'bio'
         AND o.dataset_key = 'swfsc_ichthyo'
         AND o.measurement_type = 'abundance'
-        AND sp.scientific_name = 'Sardinops sagax'
+        AND t.scientific_name = 'Sardinops sagax'
         AND o.life_stage = 'larva'
         AND o.datetime BETWEEN TIMESTAMP '2018-01-01' AND TIMESTAMP '2018-03-31'
   env:
@@ -60,7 +60,7 @@ parameters:
     default: nearest_time
   version:
     type: text
-    default: v2026.05.14
+    default: v2026.07.16
 ---
 
 Power-user mode. The engine ([`cc_match_bio_env`](https://calcofi.io/calcofi4r/reference/cc_match_bio_env.html))

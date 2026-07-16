@@ -9,7 +9,7 @@ parameters:
     hint: "blank for all providers"
   version:
     type: text
-    default: v2026.05.14
+    default: v2026.07.16
 sql: |
   SELECT
     measurement_type,

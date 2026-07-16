@@ -14,18 +14,20 @@ parameters:
     hint: "0 for all rows"
   version:
     type: text
-    default: v2026.05.14
+    default: v2026.07.16
 sql: |
   WITH cruise_casts AS (
     SELECT
-      cruise_key,
-      min(datetime_start_utc) AS date_start,
-      max(datetime_start_utc) AS date_end,
-      any_value(ship_name) AS ship_name,
+      s.cruise_key,
+      min(s.datetime) AS date_start,
+      max(s.datetime) AS date_end,
+      any_value(cr.ship_name) AS ship_name,
       count(*) AS n_casts
-    FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/casts.parquet')
-    WHERE datetime_start_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
-    GROUP BY cruise_key
+    FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/sample.parquet') s
+    LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/cruise.parquet') cr USING (cruise_key)
+    WHERE s.dataset_key = 'calcofi_bottle' AND s.sample_type = 'cast'
+      AND s.datetime BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
+    GROUP BY s.cruise_key
   )
   SELECT *
   FROM cruise_casts

@@ -9,7 +9,7 @@ parameters:
     default: |
       SELECT scientific_name, common_name, worms_id
       FROM read_parquet(
-        'https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/species.parquet')
+        'https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/taxon.parquet')
       WHERE common_name ILIKE '%sardine%'
       ORDER BY scientific_name;
 sql: |

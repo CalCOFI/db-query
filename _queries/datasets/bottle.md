@@ -23,26 +23,26 @@ parameters:
     default: 500
   version:
     type: text
-    default: v2026.05.14
+    default: v2026.07.16
 sql: |
   SELECT
-    c.datetime_start_utc,
-    c.cruise_key,
-    c.site_key,
-    c.longitude,
-    c.latitude,
-    b.depth_m,
-    bm.measurement_type,
-    bm.measurement_value,
-    bm.measurement_qual
-  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/bottle_measurement.parquet') bm
-  JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/bottle.parquet') b ON bm.bottle_id = b.bottle_id
-  JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/casts.parquet')  c ON b.cast_id    = c.cast_id
-  WHERE bm.measurement_type = '{{sqlesc env_var}}'
-    AND bm.measurement_value IS NOT NULL
-    AND b.depth_m BETWEEN {{depth_m_min}} AND {{depth_m_max}}
-    AND c.datetime_start_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
-  ORDER BY c.datetime_start_utc, b.depth_m
+    o.datetime          AS datetime_start_utc,
+    o.cruise_key,
+    o.grid_key,
+    o.longitude,
+    o.latitude,
+    o.depth_min_m       AS depth_m,
+    o.measurement_type,
+    o.measurement_value,
+    o.measurement_qual
+  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/obs.parquet') o
+  WHERE o.realm = 'env'
+    AND o.dataset_key = 'calcofi_bottle'
+    AND o.measurement_type = '{{sqlesc env_var}}'
+    AND o.measurement_value IS NOT NULL
+    AND o.depth_min_m BETWEEN {{depth_m_min}} AND {{depth_m_max}}
+    AND o.datetime BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
+  ORDER BY o.datetime, o.depth_min_m
   {{#if limit}}LIMIT {{limit}}{{/if}};
 ---
 

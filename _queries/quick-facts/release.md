@@ -5,23 +5,23 @@ parameters:
   version:
     type: text
     label: version
-    default: v2026.05.14
+    default: v2026.07.16
     hint: pin a release for archival reproducibility
 sql: |
   WITH
     cruise_n      AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/cruise.parquet')),
-    cast_n        AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/casts.parquet')),
-    species_n     AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/species.parquet')),
-    ichthyo_n     AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/ichthyo.parquet')),
-    bottle_meas_n AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/bottle_measurement.parquet')),
-    bio_date_rng  AS (SELECT min(datetime_start_utc)::VARCHAR AS d0, max(datetime_start_utc)::VARCHAR AS d1 FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/tow.parquet')),
-    env_date_rng  AS (SELECT min(datetime_start_utc)::VARCHAR AS d0, max(datetime_start_utc)::VARCHAR AS d1 FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/casts.parquet'))
+    cast_n        AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/sample.parquet') WHERE dataset_key='calcofi_bottle' AND sample_type='cast'),
+    taxon_n       AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/taxon.parquet')),
+    ichthyo_n     AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/obs.parquet') WHERE dataset_key='swfsc_ichthyo' AND measurement_type='abundance'),
+    bottle_meas_n AS (SELECT count(*) AS n FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/obs.parquet') WHERE realm='env' AND dataset_key='calcofi_bottle'),
+    bio_date_rng  AS (SELECT min(datetime)::VARCHAR AS d0, max(datetime)::VARCHAR AS d1 FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/obs.parquet') WHERE realm='bio'),
+    env_date_rng  AS (SELECT min(datetime)::VARCHAR AS d0, max(datetime)::VARCHAR AS d1 FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/obs.parquet') WHERE realm='env')
   SELECT  'release_version'  AS metric,  '{{version}}'                  AS value UNION ALL
   SELECT  'cruises',          (SELECT n::VARCHAR FROM cruise_n)         UNION ALL
   SELECT  'casts',            (SELECT n::VARCHAR FROM cast_n)           UNION ALL
-  SELECT  'species',          (SELECT n::VARCHAR FROM species_n)        UNION ALL
-  SELECT  'ichthyo_rows',     (SELECT n::VARCHAR FROM ichthyo_n)        UNION ALL
-  SELECT  'bottle_measurements', (SELECT n::VARCHAR FROM bottle_meas_n) UNION ALL
+  SELECT  'taxa',             (SELECT n::VARCHAR FROM taxon_n)          UNION ALL
+  SELECT  'ichthyo_obs',      (SELECT n::VARCHAR FROM ichthyo_n)        UNION ALL
+  SELECT  'bottle_obs',       (SELECT n::VARCHAR FROM bottle_meas_n)    UNION ALL
   SELECT  'bio_date_start',   (SELECT d0 FROM bio_date_rng)             UNION ALL
   SELECT  'bio_date_end',     (SELECT d1 FROM bio_date_rng)             UNION ALL
   SELECT  'env_date_start',   (SELECT d0 FROM env_date_rng)             UNION ALL

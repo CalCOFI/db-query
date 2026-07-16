@@ -21,31 +21,32 @@ parameters:
     default: 500
   version:
     type: text
-    default: v2026.05.14
+    default: v2026.07.16
 sql: |
   SELECT
-    sp.scientific_name,
-    sp.common_name,
-    i.life_stage,
-    t.datetime_start_utc            AS bio_datetime,
-    s.longitude             AS bio_lon,
-    s.latitude              AS bio_lat,
-    i.tally                 AS raw_tally,
-    n.standard_haul_factor * i.tally / nullif(n.prop_sorted, 0) AS std_tally,
-    n.standard_haul_factor,
-    n.prop_sorted,
-    n.volume_sampled
-  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/ichthyo.parquet') i
-  JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/species.parquet') sp ON i.species_id = sp.species_id
-  JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/net.parquet')     n  ON i.net_uuid   = n.net_uuid
-  JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/tow.parquet')     t  ON n.tow_uuid   = t.tow_uuid
-  JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/site.parquet')    s  ON t.site_uuid  = s.site_uuid
-  WHERE i.tally IS NOT NULL
-    AND i.measurement_type IS NULL
-    {{#if scientific_name}}AND sp.scientific_name = '{{sqlesc scientific_name}}'{{/if}}
-    {{#if life_stage}}AND i.life_stage = '{{sqlesc life_stage}}'{{/if}}
-    AND t.datetime_start_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
-  ORDER BY t.datetime_start_utc
+    t.scientific_name,
+    t.common_name,
+    o.life_stage,
+    o.datetime              AS bio_datetime,
+    o.longitude             AS bio_lon,
+    o.latitude              AS bio_lat,
+    o.measurement_value     AS raw_tally,
+    o.measurement_value * shf.measurement_value / nullif(ps.measurement_value, 0) AS std_tally,
+    shf.measurement_value   AS standard_haul_factor,
+    ps.measurement_value    AS prop_sorted,
+    vol.measurement_value   AS volume_sampled
+  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/obs.parquet') o
+  JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/taxon.parquet') t ON t.taxon_key = o.taxon_key
+  LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/sample_measurement.parquet') shf ON shf.sample_key = o.sample_key AND shf.measurement_type = 'std_haul_factor'
+  LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/sample_measurement.parquet') ps  ON ps.sample_key  = o.sample_key AND ps.measurement_type  = 'prop_sorted'
+  LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/sample_measurement.parquet') vol ON vol.sample_key = o.sample_key AND vol.measurement_type = 'volume_sampled'
+  WHERE o.realm = 'bio'
+    AND o.dataset_key = 'swfsc_ichthyo'
+    AND o.measurement_type = 'abundance'
+    {{#if scientific_name}}AND t.scientific_name = '{{sqlesc scientific_name}}'{{/if}}
+    {{#if life_stage}}AND o.life_stage = '{{sqlesc life_stage}}'{{/if}}
+    AND o.datetime BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
+  ORDER BY o.datetime
   {{#if limit}}LIMIT {{limit}}{{/if}};
 ---
 

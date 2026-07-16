@@ -51,7 +51,7 @@ parameters:
     default: nearest_time
   version:
     type: text
-    default: v2026.05.14
+    default: v2026.07.16
 ---
 
 Net-tow ichthyoplankton matched to CTD-bottle measurements by **scientific
