@@ -47,7 +47,7 @@ category_order:
 
 # Pinned release version — used as the default for the `version` parameter
 # on every query (each .md file can override). Bump when a new release lands.
-default_version: v2026.06.26
+default_version: v2026.07.16
 
 # Pinned external lib versions used at runtime (kept here so updates are a
 # one-line PR rather than hunting across .js files).
