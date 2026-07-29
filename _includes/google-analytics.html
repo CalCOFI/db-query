@@ -5,5 +5,8 @@
   function gtag(){ dataLayer.push(arguments); }
   gtag('js', new Date());
   // content_group is what the usage report at calcofi.io/analytics/ joins on
-  gtag('config', 'G-VV117EV9ZT', { content_group: 'db-query' });
+  // navigator.webdriver is set in every WebDriver/CDP-controlled browser, so
+  // Playwright, Puppeteer and our own shot-scraper screenshots stop counting.
+  // GA4's bot list is user-agent based and never sees them.
+  if (!navigator.webdriver) gtag('config', 'G-VV117EV9ZT', { content_group: 'db-query' });
 </script>
