@@ -26,7 +26,7 @@ Useful for:
 - Trying out a SQL pattern before turning it into a permanent query (drop a
   `.md` file in [the right `_queries/` subfolder](https://github.com/CalCOFI/db-query#adding-a-query))
 - Joining tables that aren't paired in the named queries — e.g. `taxa_rank`,
-  `cast_condition`, `_spatial`, `dic_*`
+  `cast_condition`, `spatial`, `dic_*`
 
 For arbitrary SQL with no UI at all, [shell.duckdb.org](https://shell.duckdb.org)
 is DuckDB's official WASM shell. Same engine, no CalCOFI context.
