@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # required to dispatch pages.yml after the bump commit
 
 jobs:
   bump:
@@ -50,3 +51,15 @@ jobs:
           git commit -m "Bump default_version to $latest" \
                      -m "Promoted by GCS latest.txt (set after a successful test_release.qmd run in CalCOFI/workflows)."
           git push origin main
+
+      # Deploy explicitly. A push made with the default GITHUB_TOKEN does NOT
+      # trigger other workflows -- GitHub suppresses that to prevent recursive
+      # runs -- so pages.yml (`on: push`) never fired for the commit above.
+      # The result was silent and long-lived: _config.yml said v2026.08.04 while
+      # the live site kept serving v2026.08.02, and every bump run reported
+      # success. Dispatching pages.yml is what actually publishes the change.
+      - name: Deploy the site with the new default_version
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run pages.yml --repo "$GITHUB_REPOSITORY" --ref main
