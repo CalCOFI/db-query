@@ -46,6 +46,7 @@ parameters:
       WHERE realm = 'env'
         AND measurement_type = 'temperature'
         AND measurement_value IS NOT NULL
+        AND COALESCE(NOT ((dataset_key IN ('calcofi_bottle', 'calcofi_ctd-cast') AND regexp_replace(measurement_qual, '\.0+$', '') IN ('8', '9')) OR (dataset_key = 'calcofi_dic' AND measurement_qual IN ('3', '4', '9'))), TRUE)
         AND datetime BETWEEN TIMESTAMP '2018-01-01' - INTERVAL '72 hours'
                          AND TIMESTAMP '2018-03-31' + INTERVAL '72 hours'
   max_dist_km:

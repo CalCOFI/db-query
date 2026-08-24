@@ -40,6 +40,9 @@ sql: |
     AND o.dataset_key = 'calcofi_bottle'
     AND o.measurement_type = '{{sqlesc env_var}}'
     AND o.measurement_value IS NOT NULL
+    -- quality flags: bottle 8 = suspect, 9 = missing (6 = ok, from CTD). drop this
+    -- line to see flagged values; measurement_qual is in the output either way
+    AND COALESCE(regexp_replace(o.measurement_qual, '\.0+$', '') NOT IN ('8', '9'), TRUE)
     AND o.depth_min_m BETWEEN {{depth_m_min}} AND {{depth_m_max}}
     AND o.datetime BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
   ORDER BY o.datetime, o.depth_min_m
