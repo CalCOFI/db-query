@@ -35,9 +35,7 @@
     </a>
     <a class="cc-title" href="{{ '/' | relative_url }}">{{ site.title }}</a>
     <button id="nav-toggle" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">☰</button>
-    <span class="release">
-      release&nbsp;<a id="release-link" href="https://calcofi.io/db-schema/#erd?v={{ site.default_version }}" title="Browse the {{ site.default_version }} schema (tables, columns, measurements)">{{ site.default_version }}</a>
-    </span>
+    <a class="cc-release" href="https://calcofi.io/db-schema/#erd?v={{ site.default_version }}" title="CalCOFI integrated database release {{ site.default_version }} — schema, columns, measurements and release notes">release <b id="release-link">{{ site.default_version }}</b></a>
     <span class="cc-spacer"></span>
     <span id="status">Ready — pick a query and click Run.</span>
     <button class="cc-theme-toggle" type="button" aria-label="Toggle dark / light theme">🌓</button>
