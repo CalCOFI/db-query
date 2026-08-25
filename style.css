@@ -1,34 +1,18 @@
 /* CalCOFI Query — style.css
-   Dark default theme; light theme is a 12-line `:root[data-theme="light"]`
-   override at the bottom. Palette echoes Bootswatch *darkly* (the
-   CalCOFI.github.io umbrella) and reads as a cousin of db-viz-hex / ctd-viz. */
+   Tokens (--bg … --accent-d, --mono/--sans), the header and the footer come from
+   brand/v1/theme.css — the contract every CalCOFI product shares, linked before
+   this file in _layouts/default.html. This file is only what is specific to the
+   query playground. */
 
+/* site-specific tokens on top of theme.css. --warn keeps the orange this site
+   has always used for the busy status (theme.css's is yellow), in both themes. */
 :root {
-  --bg:       #1b1d20;
-  --panel:    #24272b;
-  --panel-2:  #2c3035;
-  --border:   #3a3f44;
-  --fg:       #e6e9ed;
-  --muted:    #9aa0a6;
-  --accent:   #4dabf7;
-  --accent-d: #339af0;
   --success:  #51cf66;
   --warn:     #ffa94d;
   --error:    #ff6b6b;
-  --mono:     ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  --sans:     system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  color-scheme: dark;
 }
 :root[data-theme="light"] {
-  --bg:       #ffffff;
-  --panel:    #f8f9fa;
-  --panel-2:  #ffffff;
-  --border:   #dee2e6;
-  --fg:       #212529;
-  --muted:    #6c757d;
-  --accent:   #2780e3;
-  --accent-d: #1c69bf;
-  color-scheme: light;
+  --warn:     #ffa94d;
 }
 
 * { box-sizing: border-box; }
@@ -58,41 +42,13 @@ code { font-family: var(--mono); font-size: 0.92em; }
   min-height: 100vh;
 }
 
-header.app-header {
-  position: sticky; top: 0; z-index: 10;
-  display: flex; align-items: center; gap: 0.85rem;
-  padding: 0.55rem 1rem;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-  font-size: 0.9rem;
-}
-header.app-header .app-logo {
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  text-decoration: none;
-}
-header.app-header .app-logo:hover { text-decoration: none; }
-header.app-header .app-logo img {
-  height: 32px; width: auto;
-  display: block;
-}
-/* Theme swap: dark theme shows the white-text logo; light theme shows the dark-text one. */
-:root[data-theme="dark"]  header.app-header .logo-light,
-:root:not([data-theme="light"]) header.app-header .logo-light { display: none; }
-:root[data-theme="light"] header.app-header .logo-dark  { display: none; }
-
-header.app-header h1 {
-  margin: 0;
-  font-size: 1.05rem; font-weight: 700;
-  letter-spacing: 0.01em;
-}
-header.app-header .release {
+/* header chrome (.cc-header, logo, title, spacer, theme toggle) is theme.css's;
+   only the release link, the status pill and the sidebar toggle are ours */
+.cc-header .release {
   color: var(--muted);
   font-family: var(--mono); font-size: 0.85rem;
 }
-header.app-header .spacer { flex: 1; }
-header.app-header #status {
+.cc-header #status {
   font-family: var(--mono); font-size: 0.82rem;
   padding: 0.2rem 0.65rem;
   border-radius: 3px;
@@ -100,18 +56,16 @@ header.app-header #status {
   border-left: 3px solid var(--border);
   color: var(--muted);
 }
-header.app-header #status.busy    { border-left-color: var(--warn);    color: var(--fg); }
-header.app-header #status.success { border-left-color: var(--success); color: var(--fg); }
-header.app-header #status.error   { border-left-color: var(--error);   color: var(--error); }
-header.app-header button#theme-toggle,
-header.app-header button#nav-toggle {
+.cc-header #status.busy    { border-left-color: var(--warn);    color: var(--fg); }
+.cc-header #status.success { border-left-color: var(--success); color: var(--fg); }
+.cc-header #status.error   { border-left-color: var(--error);   color: var(--error); }
+.cc-header button#nav-toggle {
   background: transparent; border: 1px solid var(--border);
   color: var(--fg); font: inherit; cursor: pointer;
   border-radius: 4px;
   padding: 0.2rem 0.55rem;
 }
-header.app-header button#theme-toggle:hover,
-header.app-header button#nav-toggle:hover { background: var(--panel-2); }
+.cc-header button#nav-toggle:hover { background: var(--panel-2); }
 
 /* ── two-column body ─────────────────────────────────────────────────────── */
 
@@ -430,14 +384,4 @@ pre.codeblock,
 }
 #intro-wrap pre.codeblock {
   margin: 0.5rem 0;
-}
-
-/* ── footer ────────────────────────────────────────────────────────────── */
-
-footer.app-footer {
-  margin-top: 3rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.82rem;
-  color: var(--muted);
 }

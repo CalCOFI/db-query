@@ -3,7 +3,7 @@
 // The page DOM (nav + every per-query <section>) is pre-rendered by Jekyll
 // from _queries/*.md. This module just wires it up:
 //   1. hash router         (#category--name) → show the right section
-//   2. theme toggle         (light / dark, persists in localStorage)
+//   2. (theme toggle        — owned by brand/v1 theme.js, nothing here)
 //   3. form ↔ args          (DOM → JS object)
 //   4. SQL build            (inline Handlebars template OR a lib/match.js
 //                            sql_builder function named in frontmatter)
@@ -140,13 +140,6 @@ $("aside#nav").addEventListener("click", (e) => {
   if (!a) return;
   e.preventDefault();
   showQuery(a.dataset.query);
-});
-
-// ─── theme toggle ───────────────────────────────────────────────────────
-$("#theme-toggle").addEventListener("click", () => {
-  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  document.documentElement.dataset.theme = next;
-  localStorage.setItem("theme", next);
 });
 
 // ─── sidebar collapse toggle ────────────────────────────────────────────
