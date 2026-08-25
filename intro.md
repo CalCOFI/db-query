@@ -14,7 +14,7 @@ server, no credentials, no install.
    │ Your browser│
    │ (DuckDB-WASM│    ② Parquet range requests (no auth, CORS open)
    │  in a worker│ ─────────────────────────────►  storage.googleapis.com
-   │   thread)   │                                  ↳ /calcofi-db/ducklake/releases/…
+   │   thread)   │                                  ↳ /calcofi-db/ducklake/… (catalog.json, then parquet)
    │             │ ◄─────────────────────────────
    └─────────────┘    ③ Arrow result rows
 ```
@@ -49,8 +49,11 @@ itself** — wide scans of `ctd_thin` (5.5 M rows) or `bottle_measurement`
   uses Q1 2018 for this reason.
 - **Reproducibility** — every query takes a `version` parameter (default
   `{{ site.default_version }}`). Pin the version explicitly (e.g.
-  `v2026.05.14`) for archival reproducibility — every `read_parquet()` URL
-  in the emitted SQL then carries that version.
+  `v2026.08.25`) for archival reproducibility. Tables are resolved at Run
+  through that release's `catalog.json`, so the emitted SQL names the exact
+  parquet it read — content-addressed objects
+  (`ducklake/tables/{table}/{hash}/…`) from the v2026.09 releases on, the
+  per-release `…/releases/{version}/parquet/` file before.
 
 ## The same query, everywhere
 

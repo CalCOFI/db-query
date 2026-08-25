@@ -23,7 +23,7 @@ sql: |
     worms_id,
     itis_id,
     gbif_id
-  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/taxon.parquet')
+  FROM __TBL:taxon__
   {{#if name_like}}
   WHERE   common_name     ILIKE '%{{sqlesc name_like}}%'
        OR scientific_name ILIKE '%{{sqlesc name_like}}%'

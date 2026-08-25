@@ -1,0 +1,9 @@
+{
+  "name": "calcofi-db-query",
+  "private": true,
+  "description": "Browser-only DuckDB-WASM playground for the CalCOFI release Parquet on GCS (Jekyll site; package.json exists for `npm test` only)",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

@@ -6,7 +6,9 @@
 //   2. (theme toggle        — owned by brand/v1 theme.js, nothing here)
 //   3. form ↔ args          (DOM → JS object)
 //   4. SQL build            (inline Handlebars template OR a lib/match.js
-//                            sql_builder function named in frontmatter)
+//                            sql_builder function named in frontmatter;
+//                            `__TBL:table__` tokens resolve through the
+//                            release catalog — lib/release.js)
 //   5. DuckDB run + render  (sortable paginated table, downloads, metadata)
 //
 // No YAML parser. No Markdown parser. No manifest fetch. Jekyll does all
@@ -15,6 +17,7 @@
 import { getConn } from "./lib/duckdb.js";
 import * as match  from "./lib/match.js";
 import { populate as populateOptions } from "./lib/options-sources.js";
+import { readParquetFor, substituteTables } from "./lib/release.js";
 
 // Handlebars: only used to interpolate inline SQL templates from query
 // frontmatter. The four registered helpers cover every SQL pattern in v1.
@@ -33,6 +36,9 @@ Handlebars.registerHelper("sqlList", (arr) => {
 // ─── tiny DOM helpers ───────────────────────────────────────────────────
 const $  = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+// `_config.yml:default_version`, as Jekyll stamped it into the header link.
+const DEFAULT_VERSION = ($("#release-link")?.textContent || "").trim() || "latest";
 
 // ─── Google Analytics ──────────────────────────────────────────────────
 // thin wrapper so the app keeps working when GA is blocked / fails to load.
@@ -162,7 +168,7 @@ async function ensureOptionsPopulated(section) {
   if (_populated.has(section)) return;
   _populated.add(section);
   const versionInput = section.querySelector('input[name="version"]');
-  const version = (versionInput && versionInput.value) || "v2026.05.14";
+  const version = (versionInput && versionInput.value) || DEFAULT_VERSION;
   for (const sel of section.querySelectorAll("select[data-options-from]")) {
     try {
       await populateOptions(sel, sel.dataset.optionsFrom, version);
@@ -317,21 +323,44 @@ async function runQuery(section, form) {
     params_changed:   changedParams.join(",").slice(0, 100),
     params_total:     new Set(paramNames).size });
 
+  // Resolve the release catalog (one fetch per version, cached): `rp(table)`
+  // is that release's read_parquet(...) expression. A `__TBL:table__` token —
+  // or a hand-typed `__VERSION__` — in any string argument is substituted
+  // here, so textarea defaults and the SQL shell never carry a literal URL.
+  let rp;
+  try {
+    setStatus("Resolving release catalog…", "busy");
+    rp = await readParquetFor(args.version || DEFAULT_VERSION);
+    args.version = rp.version;
+    for (const k of Object.keys(args))
+      if (typeof args[k] === "string")
+        args[k] = substituteTables(args[k].replaceAll("__VERSION__", rp.version), rp);
+  } catch (err) {
+    setStatus(`✗ Release catalog failed: ${esc(err.message)}`, "error");
+    ga("query_error", {
+      query_id:      queryId,
+      error_stage:   "catalog",
+      error_message: String(err.message || err).slice(0, 100) });
+    submitBtn.disabled = false;
+    return;
+  }
+
   // Build SQL — two paths:
   //   (a) section has a `data-sql-builder` → delegate to lib/match.js
-  //   (b) inline <template class="sql-template"> → compile with Handlebars
+  //   (b) inline <template class="sql-template"> → compile with Handlebars,
+  //       then resolve `__TBL:table__` tokens against the catalog
   let sql, queryMeta;
   try {
     if (section.dataset.sqlBuilder) {
       const fn = match[section.dataset.sqlBuilder];
       if (!fn) throw new Error(`Unknown sql_builder "${section.dataset.sqlBuilder}"`);
-      ({ sql, queryMeta } = fn(args));
+      ({ sql, queryMeta } = await fn(args));
     } else {
       const tpl = section.querySelector("template.sql-template");
       if (!tpl) throw new Error("Query has no inline SQL template and no sql_builder");
       // noEscape — the template's output is SQL, not HTML; disable Handlebars'
       // default `< > & " '` → entity conversion so dates / quotes pass through.
-      sql = Handlebars.compile(tpl.innerHTML, { noEscape: true })(args);
+      sql = substituteTables(Handlebars.compile(tpl.innerHTML, { noEscape: true })(args), rp);
       queryMeta = {
         match_js_version: match.VERSION || "n/a",
         release_version:  args.version || null,

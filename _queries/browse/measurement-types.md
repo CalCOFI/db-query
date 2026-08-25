@@ -17,7 +17,7 @@ sql: |
     description,
     provider,
     dataset
-  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/measurement_type.parquet')
+  FROM __TBL:measurement_type__
   {{#if provider}}
   WHERE provider = '{{sqlesc provider}}'
   {{/if}}

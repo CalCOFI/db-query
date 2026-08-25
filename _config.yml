@@ -64,5 +64,7 @@ exclude:
   - Gemfile.lock
   - vendor
   - node_modules
+  - package.json
+  - test
   - .bundle
   - .jekyll-cache

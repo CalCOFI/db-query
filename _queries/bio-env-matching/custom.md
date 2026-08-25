@@ -18,10 +18,10 @@ parameters:
         o.measurement_value AS tally,
         t.scientific_name,
         o.life_stage
-      FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/obs.parquet') o
-      JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/taxon.parquet') t ON t.taxon_key = o.taxon_key
-      LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/sample_measurement.parquet') shf ON shf.sample_key = o.sample_key AND shf.measurement_type = 'std_haul_factor'
-      LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/sample_measurement.parquet') ps ON ps.sample_key = o.sample_key AND ps.measurement_type = 'prop_sorted'
+      FROM __TBL:obs__ o
+      JOIN __TBL:taxon__ t ON t.taxon_key = o.taxon_key
+      LEFT JOIN __TBL:sample_measurement__ shf ON shf.sample_key = o.sample_key AND shf.measurement_type = 'std_haul_factor'
+      LEFT JOIN __TBL:sample_measurement__ ps ON ps.sample_key = o.sample_key AND ps.measurement_type = 'prop_sorted'
       WHERE o.realm = 'bio'
         AND o.dataset_key = 'swfsc_ichthyo'
         AND o.measurement_type = 'abundance'
@@ -42,7 +42,7 @@ parameters:
         measurement_value AS env_value,
         depth_min_m AS env_depth_m,
         measurement_type AS measurement_type
-      FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/obs.parquet')
+      FROM __TBL:obs__
       WHERE realm = 'env'
         AND measurement_type = 'temperature'
         AND measurement_value IS NOT NULL
@@ -78,4 +78,5 @@ keys.
 `env_value`, `env_depth_m`, `measurement_type`.
 
 Default form is the worked example pre-filled — click Run and you get
-the same 13 sardine-larva rows.
+the same 13 sardine-larva rows. `__TBL:table__` in either box resolves at Run
+to the pinned release's `read_parquet(...)` for that table.

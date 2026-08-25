@@ -8,8 +8,7 @@ parameters:
     required: true
     default: |
       SELECT scientific_name, common_name, worms_id
-      FROM read_parquet(
-        'https://storage.googleapis.com/calcofi-db/ducklake/releases/__VERSION__/parquet/taxon.parquet')
+      FROM __TBL:taxon__
       WHERE common_name ILIKE '%sardine%'
       ORDER BY scientific_name;
 sql: |
@@ -19,6 +18,11 @@ sql: |
 Free-form DuckDB SQL against the release Parquet — same engine as the other
 queries, no form-driven template. The `httpfs` and `spatial` extensions are
 already loaded.
+
+Name a release table as `__TBL:table__` (any table in the release's
+`catalog.json` — `__TBL:obs__`, `__TBL:sample__`, `__TBL:cruise__`, …). It is
+resolved at Run into the `read_parquet(...)` expression for the pinned release,
+so the SQL tab shows exactly what ran and copies anywhere.
 
 Useful for:
 

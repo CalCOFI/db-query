@@ -10,6 +10,18 @@ SQL runs in your browser — no server, no credentials, no install. Same
 engine as `calcofi4r::cc_match_*()` in R or `import duckdb` in Python; the
 emitted SQL is byte-identical across all three.
 
+Queries name release tables as `__TBL:table__` tokens, never as URLs. At Run
+the app fetches the pinned release's `catalog.json`
+(`…/releases/{version}/catalog.json`; `latest.txt` holds the promoted version)
+and resolves each token into that release's `read_parquet(...)`: one https URL
+per content-addressed object under `ducklake/tables/{table}/{hash}/…` for the
+v2026.09+ catalogs (a partitioned table becomes
+`read_parquet([...], hive_partitioning = true)`), or the legacy
+`…/releases/{version}/parquet/{table}.parquet` for earlier ones — that path is
+only guaranteed for promoted/consolidated versions, so it is built nowhere
+but that fallback. `lib/release.js` (a port of
+`calcofi4r::cc_release_sources()`) is the single place a URL comes from.
+
 ## Architecture
 
 This is a **Jekyll site**. Every file in `_queries/<category>/<query>.md`
@@ -41,8 +53,10 @@ app.js                ~250 lines: hash router, form submit, Handlebars compile, 
 style.css             Dark-default theme; light-theme override via [data-theme=light]
 lib/
   duckdb.js           Lazy DuckDB-WASM init (httpfs + spatial)
+  release.js          catalog.json → read_parquet() resolver + __TBL:table__ tokens (port of calcofi4r/R/release_sources.R)
   match.js            SQL builders for bio↔env matching (port of calcofi4r/R/match.R)
   options-sources.js  Dynamic <select> options (measurement_types, cruise_keys, …)
+test/                 `npm test` — lib/release.js against both catalog shapes (fixtures from calcofi4r)
 ```
 
 ## Adding a query
@@ -75,9 +89,10 @@ parameters:
     type: text
     default: v2026.05.14
 sql: |
-  SELECT cruise_key, min(datetime_utc) AS date_start, count(*) AS n_casts
-  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/casts.parquet')
-  WHERE datetime_utc BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
+  SELECT cruise_key, min(datetime) AS date_start, count(*) AS n_casts
+  FROM __TBL:sample__
+  WHERE dataset_key = 'calcofi_bottle' AND sample_type = 'cast'
+    AND datetime BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
   GROUP BY cruise_key
   ORDER BY date_start DESC
   {{#if limit}}LIMIT {{limit}}{{/if}};
@@ -95,6 +110,7 @@ Available Handlebars helpers in the SQL template:
 | `{{sqlList arr}}` | comma-quoted list from an array, e.g. `'a', 'b'` |
 | `{{#if var}}…{{else}}…{{/if}}` | conditional include (treats `""` / `null` / `false` as falsy) |
 | `{{#unless var}}…{{/unless}}` | inverse of `if` |
+| `__TBL:table__` | not Handlebars — substituted after compile with the release's `read_parquet(...)` for `table`, resolved through `catalog.json` (`lib/release.js`). Use it instead of a literal URL; also works in textarea defaults and the SQL shell |
 
 ### Flavour 2 — delegate to lib/match.js
 
@@ -141,6 +157,7 @@ returns `{ sql, queryMeta }`. The four currently-exported builders are
 ```sh
 bundle install
 bundle exec jekyll serve     # → http://localhost:4000/db-query/
+npm test                     # node --test: lib/release.js resolver against both catalog shapes
 ```
 
 Or just push to `main` — GitHub Pages builds Jekyll automatically and the
@@ -156,6 +173,11 @@ site is live at `https://calcofi.io/db-query/` in ~1 min.
   [`calcofi4r/R/match.R`](https://github.com/CalCOFI/calcofi4r/blob/main/R/match.R) —
   when that R file changes, this one must follow. See verification diff in
   the [CalCOFI/docs](https://github.com/CalCOFI/docs) pull-request history.
+- `lib/release.js` mirrors
+  [`calcofi4r/R/release_sources.R`](https://github.com/CalCOFI/calcofi4r/blob/main/R/release_sources.R)
+  and `calcofi4py`'s `release.py` with one deliberate deviation: a legacy
+  (pre-v2026.09) *partitioned* table falls back to the consolidated single
+  file rather than the `s3://` glob, because the browser cannot glob GCS.
 
 ## See also
 

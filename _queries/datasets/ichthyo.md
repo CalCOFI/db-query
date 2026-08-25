@@ -35,11 +35,11 @@ sql: |
     shf.measurement_value   AS standard_haul_factor,
     ps.measurement_value    AS prop_sorted,
     vol.measurement_value   AS volume_sampled
-  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/obs.parquet') o
-  JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/taxon.parquet') t ON t.taxon_key = o.taxon_key
-  LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/sample_measurement.parquet') shf ON shf.sample_key = o.sample_key AND shf.measurement_type = 'std_haul_factor'
-  LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/sample_measurement.parquet') ps  ON ps.sample_key  = o.sample_key AND ps.measurement_type  = 'prop_sorted'
-  LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/sample_measurement.parquet') vol ON vol.sample_key = o.sample_key AND vol.measurement_type = 'volume_sampled'
+  FROM __TBL:obs__ o
+  JOIN __TBL:taxon__ t ON t.taxon_key = o.taxon_key
+  LEFT JOIN __TBL:sample_measurement__ shf ON shf.sample_key = o.sample_key AND shf.measurement_type = 'std_haul_factor'
+  LEFT JOIN __TBL:sample_measurement__ ps  ON ps.sample_key  = o.sample_key AND ps.measurement_type  = 'prop_sorted'
+  LEFT JOIN __TBL:sample_measurement__ vol ON vol.sample_key = o.sample_key AND vol.measurement_type = 'volume_sampled'
   WHERE o.realm = 'bio'
     AND o.dataset_key = 'swfsc_ichthyo'
     AND o.measurement_type = 'abundance'

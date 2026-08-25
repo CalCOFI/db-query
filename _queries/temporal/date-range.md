@@ -23,8 +23,8 @@ sql: |
     s.longitude,
     s.latitude,
     cr.ship_name
-  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/sample.parquet') s
-  LEFT JOIN read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/cruise.parquet') cr USING (cruise_key)
+  FROM __TBL:sample__ s
+  LEFT JOIN __TBL:cruise__ cr USING (cruise_key)
   WHERE s.dataset_key = 'calcofi_bottle' AND s.sample_type = 'cast'
     AND s.datetime BETWEEN TIMESTAMP '{{date_min}}' AND TIMESTAMP '{{date_max}}'
   ORDER BY s.datetime

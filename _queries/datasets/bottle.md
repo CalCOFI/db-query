@@ -35,7 +35,7 @@ sql: |
     o.measurement_type,
     o.measurement_value,
     o.measurement_qual
-  FROM read_parquet('https://storage.googleapis.com/calcofi-db/ducklake/releases/{{version}}/parquet/obs.parquet') o
+  FROM __TBL:obs__ o
   WHERE o.realm = 'env'
     AND o.dataset_key = 'calcofi_bottle'
     AND o.measurement_type = '{{sqlesc env_var}}'
