@@ -175,9 +175,11 @@ site is live at `https://calcofi.io/db-query/` in ~1 min.
   the [CalCOFI/docs](https://github.com/CalCOFI/docs) pull-request history.
 - `lib/release.js` mirrors
   [`calcofi4r/R/release_sources.R`](https://github.com/CalCOFI/calcofi4r/blob/main/R/release_sources.R)
-  and `calcofi4py`'s `release.py` with one deliberate deviation: a legacy
-  (pre-v2026.09) *partitioned* table falls back to the consolidated single
-  file rather than the `s3://` glob, because the browser cannot glob GCS.
+  and `calcofi4py`'s `release.py` exactly (`resolveTable()`); what differs is
+  only which source the browser *reads*: a partitioned table goes through its
+  single-file twin (`singleFile` — the catalog object without `partition_by`,
+  which `obs` publishes) when there is one, else the explicit https list,
+  because DuckDB-WASM cannot glob and prefers one object.
 
 ## See also
 
