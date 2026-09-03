@@ -15,7 +15,7 @@ import { dirname, join } from "node:path";
 
 import {
   resolveTable, readParquetSql, readParquetSqlForBrowser, substituteTables, isVersion,
-  fetchCatalog, readParquetFor
+  fetchCatalog, readParquetFor, readParquetForCatalog, catalogViews, viewTables, viewSql
 } from "../lib/release.js";
 import { extractSourceUrls } from "../lib/match.js";
 
@@ -23,6 +23,7 @@ const here      = dirname(fileURLToPath(import.meta.url));
 const fixture   = (f) => JSON.parse(readFileSync(join(here, "fixtures", f), "utf8"));
 const canonical = fixture("catalog_canonical.json");
 const legacy    = fixture("catalog_legacy.json");
+const viewOnly  = fixture("catalog_view_only.json");
 
 const GCS = "https://storage.googleapis.com/calcofi-db";
 
@@ -143,6 +144,81 @@ test("isVersion", () => {
   assert.equal(isVersion("v2026.09"), true);
   assert.equal(isVersion("latest"), false);
   assert.equal(isVersion("2026.08.25"), false);
+});
+
+// ── catalog views (D-S1: obs over obs_bio + obs_env) ────────────────────────
+test("catalogViews / viewTables / viewSql: the map, its tables, the SQL through any reader", () => {
+  const views = catalogViews(canonical);
+  assert.deepEqual(Object.keys(views), ["obs"]);
+  assert.deepEqual(viewTables(views.obs), ["obs_bio", "obs_env"]);
+  assert.match(views.obs, /\{\{obs_bio\}\}/);
+  assert.match(views.obs, /value AS measurement_value/);
+  // default: quoted identifiers
+  const sql = viewSql(canonical, "obs");
+  assert.ok(!sql.includes("{{"));
+  assert.ok(sql.includes('FROM "obs_bio"\nUNION ALL\n') && sql.endsWith('FROM "obs_env"'));
+  // any reader: the catalog's own objects
+  const rp = (t) => readParquetSqlForBrowser(resolveTable(canonical, t));
+  const over = viewSql(canonical, "obs", rp);
+  assert.ok(over.includes(`FROM read_parquet('${GCS}/ducklake/tables/obs_bio/b19def67a5bcfe2713624ebb/obs_bio.parquet')`));
+  assert.ok(over.includes("measurement_type=salinity") && over.endsWith("'], hive_partitioning = true)"));
+  assert.throws(() => viewSql(canonical, "nope"), /not a view.*views: obs/);
+  assert.deepEqual(catalogViews(legacy), {});
+  assert.throws(() => viewSql(legacy, "obs"), /not a view/);
+});
+
+test("a deprecated table still resolves and says so; a view-only name throws clearly", () => {
+  const obs = resolveTable(canonical, "obs");
+  assert.equal(obs.deprecated, true);
+  assert.deepEqual(obs.replacedBy, ["obs_bio", "obs_env"]);
+  assert.equal(obs.removedIn, "next");
+  assert.equal(obs.urls.length, 2);                       // its objects ship through the window
+  const cruise = resolveTable(canonical, "cruise");
+  assert.equal(cruise.deprecated, false);
+  assert.deepEqual(cruise.replacedBy, []);
+  assert.equal(cruise.removedIn, null);
+  const bio = resolveTable(canonical, "obs_bio");
+  assert.deepEqual(bio.urls, [`${GCS}/ducklake/tables/obs_bio/b19def67a5bcfe2713624ebb/obs_bio.parquet`]);
+  assert.equal(bio.hive, false);
+  const env = resolveTable(canonical, "obs_env");
+  assert.equal(env.hive, true); assert.equal(env.urls.length, 2); assert.equal(env.singleFile, null);
+  // the release after the window: obs is a view alone
+  assert.ok(!viewOnly.tables.some((t) => t.name === "obs"));
+  assert.throws(() => resolveTable(viewOnly, "obs"),
+    /'obs' is a view in the catalog for v2026\.10\.01 \(over obs_bio, obs_env\).*readParquetFor/);
+  assert.throws(() => resolveTable(viewOnly, "casts"), /not in the catalog/);
+  // legacy: no deprecation fields
+  const l = resolveTable(legacy, "obs");
+  assert.equal(l.deprecated, false); assert.deepEqual(l.replacedBy, []); assert.equal(l.removedIn, null);
+});
+
+test("readParquetForCatalog: __TBL:obs__ expands to the view over the pair, parenthesised; tables as before", () => {
+  const rp = readParquetForCatalog(canonical);
+  assert.equal(rp.version, "v2026.09.01");
+  const obs = rp("obs");
+  assert.ok(obs.startsWith("(SELECT obs_id, 'bio' AS realm") && obs.endsWith(", hive_partitioning = true))"));
+  // the deprecated obs objects are NOT what is read
+  assert.ok(!obs.includes("9999999999999999999999ff/obs.parquet"));
+  assert.ok(obs.includes(`read_parquet('${GCS}/ducklake/tables/obs_bio/b19def67a5bcfe2713624ebb/obs_bio.parquet')`));
+  assert.ok(obs.includes("measurement_type=temperature/5555555555555555555555ee/data_0.parquet"));
+  // a plain table is unchanged
+  assert.equal(rp("cruise"), readParquetSqlForBrowser(resolveTable(canonical, "cruise")));
+  // it stands wherever a read_parquet(...) stood, alias or not
+  const sql = substituteTables("SELECT count(*) FROM __TBL:obs__ o JOIN __TBL:cruise__ c USING (cruise_key) WHERE o.realm = 'env'", rp);
+  assert.ok(sql.startsWith("SELECT count(*) FROM (SELECT obs_id, 'bio' AS realm"));
+  assert.ok(sql.includes(") o JOIN read_parquet('"));
+  // provenance sees the objects the view reads
+  assert.deepEqual(extractSourceUrls(rp("obs")), [
+    `${GCS}/ducklake/tables/obs_bio/b19def67a5bcfe2713624ebb/obs_bio.parquet`,
+    `${GCS}/ducklake/tables/obs_env/measurement_type=salinity/4444444444444444444444dd/data_0.parquet`,
+    `${GCS}/ducklake/tables/obs_env/measurement_type=temperature/5555555555555555555555ee/data_0.parquet`
+  ]);
+  // the release after the window: same expansion, no obs table needed
+  const rpNext = readParquetForCatalog(viewOnly);
+  assert.equal(rpNext("obs"), obs.replaceAll("v2026.09.01", "v2026.10.01"));
+  // a legacy catalog: obs is its single-file twin, as before
+  assert.equal(readParquetForCatalog(legacy)("obs"),
+    `read_parquet('${GCS}/ducklake/releases/v2026.08.14/parquet/obs.parquet')`);
 });
 
 // ── live (network) ──────────────────────────────────────────────────────────
