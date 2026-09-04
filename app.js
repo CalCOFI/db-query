@@ -3,7 +3,7 @@
 // The page DOM (nav + every per-query <section>) is pre-rendered by Jekyll
 // from _queries/*.md. This module just wires it up:
 //   1. hash router         (#category--name) → show the right section
-//   2. (theme toggle        — owned by brand/v1 theme.js, nothing here)
+//   2. (theme toggle        — owned by brand/v2 theme.js, nothing here)
 //   3. form ↔ args          (DOM → JS object)
 //   4. SQL build            (inline Handlebars template OR a lib/match.js
 //                            sql_builder function named in frontmatter;
