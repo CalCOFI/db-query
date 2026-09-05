@@ -56,8 +56,33 @@ lib/
   release.js          catalog.json → read_parquet() resolver + __TBL:table__ tokens (port of calcofi4r/R/release_sources.R)
   match.js            SQL builders for bio↔env matching (port of calcofi4r/R/match.R)
   options-sources.js  Dynamic <select> options (measurement_types, cruise_keys, …)
-test/                 `npm test` — lib/release.js against both catalog shapes (fixtures from calcofi4r)
+  url-params.js       Open a query from a link: the query string fills the section's fields
+test/                 `npm test` — lib/release.js against both catalog shapes (fixtures from calcofi4r),
+                      and lib/url-params.js against the link a dataset page builds
 ```
+
+### Open a query from a link
+
+The hash picks the query (`#category--name`); since 2026-09-05 the **query string fills its
+fields**, so a link can hand someone a query ready to run:
+
+```
+https://calcofi.io/db-query/?sql=SELECT+*+FROM+__TBL%3Aobs__+LIMIT+100%3B#sql-shell--shell
+https://calcofi.io/db-query/?env_var=salinity&date_min=2018-01-01#datasets--bottle
+```
+
+- `?sql=` with no hash implies `#sql-shell--shell` — it is the only section with a `sql` field.
+- Only fields the form actually has are set; a `<select>` value it does not offer is ignored
+  rather than blanking the field, so a stale link degrades instead of misleading.
+- `?run=1` runs the query once the section is up. Optional and last: everything else works if it
+  does not.
+- **Values are read, never written back.** `showQuery`'s `replaceState` syncs the hash with a
+  fragment-only URL, which leaves the query string exactly as the sender wrote it, and GA still
+  records parameter *names* only — a prefilled `sql` is far past GA4's 100-character cap.
+
+Every dataset page on calcofi.io builds one of these: a saved query where db-query has one
+(`datasets--bottle`, `datasets--ichthyo`), otherwise the shell with that dataset's SQL prefilled
+(CalCOFI.github.io `_plugins/datasets.rb`, UI plan D-6 / Decision 20).
 
 ## Adding a query
 

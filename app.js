@@ -2,7 +2,9 @@
 //
 // The page DOM (nav + every per-query <section>) is pre-rendered by Jekyll
 // from _queries/*.md. This module just wires it up:
-//   1. hash router         (#category--name) → show the right section
+//   1. hash router         (#category--name) → show the right section, and on load the query
+//                            string fills that section's fields (lib/url-params.js), so a link
+//                            can open a query ready to run — read only, never written back
 //   2. (theme toggle        — owned by brand/v2 theme.js, nothing here)
 //   3. form ↔ args          (DOM → JS object)
 //   4. SQL build            (inline Handlebars template OR a lib/match.js
@@ -18,6 +20,7 @@ import { getConn } from "./lib/duckdb.js";
 import * as match  from "./lib/match.js";
 import { populate as populateOptions } from "./lib/options-sources.js";
 import { readParquetFor, substituteTables } from "./lib/release.js";
+import { readUrl, applyParams } from "./lib/url-params.js";
 
 // Handlebars: only used to interpolate inline SQL templates from query
 // frontmatter. The four registered helpers cover every SQL pattern in v1.
@@ -452,4 +455,23 @@ for (const section of allSections) {
 }
 
 // ─── boot ───────────────────────────────────────────────────────────────
-showQuery(location.hash.slice(1));
+// The URL may carry field values as well as a section: `?sql=…#sql-shell--shell` from a
+// calcofi.io dataset page opens the shell with that dataset's SQL already in the box. Applied
+// ONCE, before the section is shown, and never written back — `showQuery`'s replaceState syncs
+// the hash with a fragment-only URL, which leaves the query string exactly as the sender wrote it.
+const fromUrl = readUrl(location.search, location.hash);
+if (Object.keys(fromUrl.params).length) {
+  const section = allSections.find((s) => s.dataset.queryId === fromUrl.id);
+  const form = section?.querySelector("form.query-form");
+  const applied = applyParams(form, fromUrl.params);
+  if (applied.length) ga("query_from_url", { query_id: fromUrl.id, params: applied.join(",") });
+}
+showQuery(fromUrl.id || location.hash.slice(1));
+
+// `?run=1` runs it once the section is up. Optional, and deliberately last: everything above
+// works with JS that fails here.
+if (fromUrl.run && fromUrl.id) {
+  const section = allSections.find((s) => s.dataset.queryId === fromUrl.id);
+  const form = section?.querySelector("form.query-form");
+  if (section && form) runQuery(section, form);
+}
