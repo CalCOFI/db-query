@@ -57,3 +57,5 @@ dynamic height, pH, …
 The `env_var` dropdown is populated on first focus from
 `measurement_type.parquet` so it always reflects the release you're
 querying.
+
+**[calcofi_bottle dataset page ↗](https://calcofi.io/datasets/calcofi_bottle/)**

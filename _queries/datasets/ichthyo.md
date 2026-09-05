@@ -56,3 +56,5 @@ catch-per-effort: `standard_haul_factor × tally / prop_sorted`.
 
 For the same observations **matched to CTD-bottle measurements** (one
 `env_value` per row), see **Bio ↔ Env Matching → by name**.
+
+**[swfsc_ichthyo dataset page ↗](https://calcofi.io/datasets/swfsc_ichthyo/)**
