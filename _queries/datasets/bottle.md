@@ -49,13 +49,18 @@ sql: |
   {{#if limit}}LIMIT {{limit}}{{/if}};
 ---
 
-`bottle_measurement` ⋈ `bottle` ⋈ `casts` for one `measurement_type` over a
-depth + date window. Most CalCOFI oceanographic variables live here:
-temperature, salinity, oxygen, nutrients, chlorophyll-a, sigma-theta,
-dynamic height, pH, …
+The bottle dataset's `obs` rows (`realm = 'env'`: one value per depth of a cast)
+for one `measurement_type` over a depth + date window. Most CalCOFI
+oceanographic variables live here: temperature, salinity, oxygen, nutrients,
+chlorophyll-a, sigma-theta, dynamic height, pH, …
 
-The `env_var` dropdown is populated on first focus from
-`measurement_type.parquet` so it always reflects the release you're
-querying.
+The `env_var` dropdown is populated on first focus from the release's
+`measurement_type` table, so it always reflects the release you're querying.
+A value taken once per cast (not at each depth) is a row of `sample_measurement`,
+not of `obs`.
+
+`grid_key` changed for about one bottle row in ten in v2026.10.04 (a cell per
+official station); to carry a key you stored earlier forward, use
+[**Spatial → old grid keys → new cells**](#spatial--grid-crosswalk).
 
 **[calcofi_bottle dataset page ↗](https://calcofi.io/datasets/calcofi_bottle/)**

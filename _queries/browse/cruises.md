@@ -40,5 +40,5 @@ your date range. Columns: `cruise_key` (`YYYY-MM-NODC` natural key — see
 [Database](https://calcofi.io/docs/db.html)), date span, ship name, number
 of casts.
 
-`cruise` itself only has 691 rows; the `count(*)` over bottle casts in
+`cruise` itself has one row per cruise; the `count(*)` over bottle casts in
 `sample` makes the date-window filter meaningful and adds `n_casts`.

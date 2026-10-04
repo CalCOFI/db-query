@@ -46,10 +46,17 @@ sql: |
   {{#if limit}}LIMIT {{limit}}{{/if}};
 ---
 
-CTD casts whose decimal lon/lat fall inside the bounding box and whose
+Bottle casts whose decimal lon/lat fall inside the bounding box and whose
 `datetime_start_utc` falls in the date range. Pasted straight from the CalCOFI
 sampling grid: defaults (-125 to -117 lon, 30 to 38 lat) cover the full
 historical pattern from Pt. Conception south to Baja and out to ~Sta. 60.
+
+`grid_key` is the cell of the station grid the cast lies in. From v2026.10.04
+the grid is one cell per official station (decimal stations such as
+`st26.7-ln93.3` included) and a key kept from an earlier release may name a
+different polygon: map old keys with
+[**Spatial → old grid keys → new cells**](#spatial--grid-crosswalk), and take
+line and station from `grid.line` / `grid.station` (doubles), not by parsing the key.
 
 For richer spatial filtering (polygon, transect, distance to shore) use
 the **SQL shell** with `ST_Within` / `ST_Distance_Sphere`.

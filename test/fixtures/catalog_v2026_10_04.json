@@ -1,0 +1,386 @@
+{
+ "version": "v2026.10.04",
+ "release_date": "2026-10-04",
+ "layout": "canonical",
+ "writer": {
+  "compression": "zstd",
+  "row_group_size": 122880,
+  "parquet_version": "V1"
+ },
+ "views": {
+  "obs": "SELECT obs_id, 'bio' AS realm, dataset_key, sample_key, grid_key, cruise_key,\n       latitude, longitude, datetime, depth_min_m, depth_max_m,\n       taxon_key, life_stage, measurement_type, value AS measurement_value,\n       measurement_qual, measurement_prec, hex_id\nFROM {{obs_bio}}\nUNION ALL\nSELECT obs_id, 'env' AS realm, dataset_key, sample_key, grid_key, cruise_key,\n       latitude, longitude, datetime, depth_min_m, depth_max_m,\n       taxon_key, life_stage, measurement_type, value AS measurement_value,\n       measurement_qual, measurement_prec, hex_id\nFROM {{obs_env}}"
+ },
+ "tables": [
+  {
+   "name": "measurement_type",
+   "rows": 231,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/measurement_type/b6c264e24023c26614562fce/measurement_type.parquet",
+     "content_hash": "b6c264e24023c26614562fce2eca736d",
+     "bytes": 15877
+    }
+   ]
+  },
+  {
+   "name": "dataset",
+   "rows": 22,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/dataset/30405f0077def2c28d16ef90/dataset.parquet",
+     "content_hash": "30405f0077def2c28d16ef902e03b52d",
+     "bytes": 19646
+    }
+   ]
+  },
+  {
+   "name": "region",
+   "rows": 4,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/region/b0b4ead4d403485c9fc0e93c/region.parquet",
+     "content_hash": "b0b4ead4d403485c9fc0e93c43bf4b03",
+     "bytes": 4018
+    }
+   ]
+  },
+  {
+   "name": "spatial_attribute",
+   "rows": 148461,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/spatial_attribute/de289d0541a58cef3a298ec4/spatial_attribute.parquet",
+     "content_hash": "de289d0541a58cef3a298ec40b531a78",
+     "bytes": 537977
+    }
+   ]
+  },
+  {
+   "name": "spatial",
+   "rows": 13206,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/spatial/6c4aa2f1085f4d2707050d26/spatial.parquet",
+     "content_hash": "6c4aa2f1085f4d2707050d2683dfe70d",
+     "bytes": 47781969
+    }
+   ]
+  },
+  {
+   "name": "grid",
+   "rows": 225,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/grid/a87dcfc7baa4ea11e98d4b59/grid.parquet",
+     "content_hash": "a87dcfc7baa4ea11e98d4b59bf6cd1d5",
+     "bytes": 336855
+    }
+   ]
+  },
+  {
+   "name": "cruise",
+   "rows": 845,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/cruise/65b28e6ec769b28aa9b0a81a/cruise.parquet",
+     "content_hash": "65b28e6ec769b28aa9b0a81ad78fa18d",
+     "bytes": 21071
+    }
+   ]
+  },
+  {
+   "name": "ship",
+   "rows": 49,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/ship/7b1ace141e79c01dec404de9/ship.parquet",
+     "content_hash": "7b1ace141e79c01dec404de9fd61b665",
+     "bytes": 1555
+    }
+   ]
+  },
+  {
+   "name": "lookup",
+   "rows": 26,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/lookup/4638ecc002bce55650565636/lookup.parquet",
+     "content_hash": "4638ecc002bce556505656366602d689",
+     "bytes": 1597
+    }
+   ]
+  },
+  {
+   "name": "fish",
+   "rows": 10796,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/fish/8dd13e97c60f5f074a7ebafd/fish.parquet",
+     "content_hash": "8dd13e97c60f5f074a7ebafde5ad7548",
+     "bytes": 45849
+    }
+   ]
+  },
+  {
+   "name": "sample",
+   "rows": 1479442,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/sample/7fba2c08c8a284a49a2469e8/sample.parquet",
+     "content_hash": "7fba2c08c8a284a49a2469e80bc3494d",
+     "bytes": 28331349
+    }
+   ]
+  },
+  {
+   "name": "obs",
+   "rows": 33383979,
+   "partitioned": true,
+   "supplemental": false,
+   "deprecated": true,
+   "replaced_by": [
+    "obs_bio",
+    "obs_env"
+   ],
+   "removed_in": "next",
+   "objects": [
+    {
+     "path": "ducklake/tables/obs/dataset_key=calcofi_2022-edna/f4bd530899502d593fd4a585/data_0.parquet",
+     "content_hash": "f4bd530899502d593fd4a585ceafe87f",
+     "partition_by": "dataset_key",
+     "bytes": 5879
+    },
+    {
+     "path": "ducklake/tables/obs/dataset_key=calcofi_bottle/1a4b49dffd45864c88098c49/data_0.parquet",
+     "content_hash": "1a4b49dffd45864c88098c499e0cc415",
+     "partition_by": "dataset_key",
+     "bytes": 75713847
+    },
+    {
+     "path": "ducklake/tables/obs/71f51b3f031fdc4306df4b0c/obs.parquet",
+     "content_hash": "71f51b3f031fdc4306df4b0c34ae18a6",
+     "bytes": 251714301
+    }
+   ]
+  },
+  {
+   "name": "obs_attribute",
+   "rows": 476615,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/obs_attribute/3e456538757716624d6beff7/obs_attribute.parquet",
+     "content_hash": "3e456538757716624d6beff7e8df22f9",
+     "bytes": 1919463
+    }
+   ]
+  },
+  {
+   "name": "sample_measurement",
+   "rows": 660005,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/sample_measurement/a21db385444816056c9a57de/sample_measurement.parquet",
+     "content_hash": "a21db385444816056c9a57de98ea2325",
+     "bytes": 2510126
+    }
+   ]
+  },
+  {
+   "name": "taxon",
+   "rows": 2608,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/taxon/8af3c6ce468715116f9da134/taxon.parquet",
+     "content_hash": "8af3c6ce468715116f9da134c25d70e5",
+     "bytes": 89063
+    }
+   ]
+  },
+  {
+   "name": "dataset_taxon",
+   "rows": 1982,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/dataset_taxon/d70f90619fea3c17deff1ce3/dataset_taxon.parquet",
+     "content_hash": "d70f90619fea3c17deff1ce3394d2916",
+     "bytes": 60070
+    }
+   ]
+  },
+  {
+   "name": "taxon_group",
+   "rows": 444,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/taxon_group/746bd4e08194e98f2f69fbf5/taxon_group.parquet",
+     "content_hash": "746bd4e08194e98f2f69fbf5a9e7ee26",
+     "bytes": 2764
+    }
+   ]
+  },
+  {
+   "name": "sample_spatial",
+   "rows": 945262,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/sample_spatial/08493a902d6e39679436f90d/sample_spatial.parquet",
+     "content_hash": "08493a902d6e39679436f90dd89b9290",
+     "bytes": 7460692
+    }
+   ]
+  },
+  {
+   "name": "sample_root",
+   "rows": 425539,
+   "partitioned": false,
+   "supplemental": true,
+   "objects": [
+    {
+     "path": "ducklake/tables/sample_root/51bc2c6d1f1d2be4f8a7516a/sample_root.parquet",
+     "content_hash": "51bc2c6d1f1d2be4f8a7516afece3f72",
+     "bytes": 11621137
+    }
+   ]
+  },
+  {
+   "name": "obs_bio",
+   "rows": 1602659,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/obs_bio/a558bbf676bf6d969b4c6930/obs_bio.parquet",
+     "content_hash": "a558bbf676bf6d969b4c69308aac3fed",
+     "bytes": 32115122
+    }
+   ]
+  },
+  {
+   "name": "obs_env",
+   "rows": 31781320,
+   "partitioned": true,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/obs_env/measurement_type=air_temp_c/1fa68fc18a9b0db356396b9c/data_0.parquet",
+     "content_hash": "1fa68fc18a9b0db356396b9ce2a0a3f5",
+     "partition_by": "measurement_type",
+     "bytes": 1606928
+    },
+    {
+     "path": "ducklake/tables/obs_env/measurement_type=alkalinity_rep1/99c1982ee74f729e55fabec8/data_0.parquet",
+     "content_hash": "99c1982ee74f729e55fabec8dd86bde8",
+     "partition_by": "measurement_type",
+     "bytes": 46133
+    }
+   ]
+  },
+  {
+   "name": "climatology",
+   "rows": 821402,
+   "partitioned": true,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/climatology/measurement_type=alkalinity_rep1/daa16c86791079c68fe9cca1/data_0.parquet",
+     "content_hash": "daa16c86791079c68fe9cca16ea476f6",
+     "partition_by": "measurement_type",
+     "bytes": 1633
+    },
+    {
+     "path": "ducklake/tables/climatology/measurement_type=alkalinity/4fc0052a0e5f33b9e5b6e49b/data_0.parquet",
+     "content_hash": "4fc0052a0e5f33b9e5b6e49b6c5a6350",
+     "partition_by": "measurement_type",
+     "bytes": 1676
+    }
+   ]
+  },
+  {
+   "name": "grid_crosswalk",
+   "rows": 673,
+   "partitioned": false,
+   "supplemental": false,
+   "objects": [
+    {
+     "path": "ducklake/tables/grid_crosswalk/445946ea5cfa8aaf914048c4/grid_crosswalk.parquet",
+     "content_hash": "445946ea5cfa8aaf914048c44d2bb181",
+     "bytes": 17742
+    }
+   ]
+  },
+  {
+   "name": "obs_ctd_full",
+   "rows": 282680638,
+   "partitioned": true,
+   "supplemental": true,
+   "objects": [
+    {
+     "path": "ducklake/tables/obs_ctd_full/cruise_key=1993-08-32NM/7c5a5d284f6d4c6184efcc30/data_0.parquet",
+     "content_hash": "7c5a5d284f6d4c6184efcc30bdb7bf70",
+     "partition_by": "cruise_key",
+     "bytes": 7598801
+    },
+    {
+     "path": "ducklake/tables/obs_ctd_full/cruise_key=1993-10-32NM/861ebf69cf14835fd940da3e/data_0.parquet",
+     "content_hash": "861ebf69cf14835fd940da3e0f2ce17d",
+     "partition_by": "cruise_key",
+     "bytes": 7726242
+    }
+   ]
+  },
+  {
+   "name": "obs_mets_full",
+   "rows": 19926523,
+   "partitioned": true,
+   "supplemental": true,
+   "objects": [
+    {
+     "path": "ducklake/tables/obs_mets_full/cruise_key=2004-01-31JD/a972805bb9c4becf8c528375/data_0.parquet",
+     "content_hash": "a972805bb9c4becf8c5283759ffcd2c4",
+     "partition_by": "cruise_key",
+     "bytes": 171633
+    },
+    {
+     "path": "ducklake/tables/obs_mets_full/cruise_key=2004-04-32NM/d48146b49e98d23650d36f9c/data_0.parquet",
+     "content_hash": "d48146b49e98d23650d36f9c82fdfadd",
+     "partition_by": "cruise_key",
+     "bytes": 125855
+    }
+   ]
+  }
+ ]
+}

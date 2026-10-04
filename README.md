@@ -58,6 +58,7 @@ lib/
   options-sources.js  Dynamic <select> options (measurement_types, cruise_keys, …)
   url-params.js       Open a query from a link: the query string fills the section's fields
 test/                 `npm test` — lib/release.js against both catalog shapes (fixtures from calcofi4r),
+                      every `__TBL:name__` in _queries/ against a v2026.10.04 catalog (queries.test.js),
                       and lib/url-params.js against the link a dataset page builds
 ```
 
