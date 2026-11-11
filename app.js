@@ -11,12 +11,15 @@
 //                            sql_builder function named in frontmatter;
 //                            `__TBL:table__` tokens resolve through the
 //                            release catalog — lib/release.js)
-//   5. DuckDB run + render  (sortable paginated table, downloads, metadata)
+//   5. DuckDB run + render  (sortable paginated table, downloads, metadata; the Arrow result
+//                            becomes rows in lib/arrow-rows.js, which prints DATE / TIMESTAMP
+//                            columns as dates for the table and the CSV alike)
 //
 // No YAML parser. No Markdown parser. No manifest fetch. Jekyll does all
 // that at build time; the browser receives static HTML.
 
 import { getConn } from "./lib/duckdb.js";
+import { arrowToRows } from "./lib/arrow-rows.js";
 import * as match  from "./lib/match.js";
 import { populate as populateOptions } from "./lib/options-sources.js";
 import { readParquetFor, substituteTables } from "./lib/release.js";
@@ -182,23 +185,6 @@ async function ensureOptionsPopulated(section) {
   }
 }
 allSections.forEach((s) => s.addEventListener("focusin", () => ensureOptionsPopulated(s)));
-
-// ─── Arrow table → JS rows (BigInt-safe, Date-stringified) ─────────────
-function arrowToRows(arrow) {
-  const fields = arrow.schema.fields.map((f) => f.name);
-  return arrow.toArray().map((row) => {
-    const r = row.toJSON ? row.toJSON() : row;
-    const o = {};
-    for (const f of fields) {
-      let v = r[f];
-      if (typeof v === "bigint")     v = Number(v);
-      else if (v instanceof Date)    v = v.toISOString();
-      else if (v && typeof v === "object" && v.toString) v = v.toString();
-      o[f] = v;
-    }
-    return o;
-  });
-}
 
 // ─── result table (paginated, sortable) ────────────────────────────────
 const PAGE_SIZE = 100;
