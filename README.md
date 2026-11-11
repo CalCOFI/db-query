@@ -53,13 +53,15 @@ app.js                ~250 lines: hash router, form submit, Handlebars compile, 
 style.css             Dark-default theme; light-theme override via [data-theme=light]
 lib/
   duckdb.js           Lazy DuckDB-WASM init (httpfs + spatial)
+  arrow-rows.js       Arrow result → rows for the table and the CSV; DATE / TIMESTAMP columns print as dates (UTC), by schema type
   release.js          catalog.json → read_parquet() resolver + __TBL:table__ tokens (port of calcofi4r/R/release_sources.R)
   match.js            SQL builders for bio↔env matching (port of calcofi4r/R/match.R)
   options-sources.js  Dynamic <select> options (measurement_types, cruise_keys, …)
   url-params.js       Open a query from a link: the query string fills the section's fields
 test/                 `npm test` — lib/release.js against both catalog shapes (fixtures from calcofi4r),
                       every `__TBL:name__` in _queries/ against a v2026.10.04 catalog (queries.test.js),
-                      and lib/url-params.js against the link a dataset page builds
+                      lib/url-params.js against the link a dataset page builds,
+                      and lib/arrow-rows.js on the date / timestamp cells of a result (arrow-rows.test.js)
 ```
 
 ### Open a query from a link
