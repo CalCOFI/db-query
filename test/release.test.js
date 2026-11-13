@@ -242,3 +242,18 @@ test("live: promoted catalog resolves and what the browser reads answers over ht
     ? `read_parquet('${GCS}/ducklake/releases/v2026.08.25/parquet/obs.parquet')`
     : rp("obs"));
 });
+
+test("a path the catalog lists more than once is read once (v2026.11.04-.09 listed 24 obs_ctd_full paths 2-3 times)", () => {
+  const repeated = fixture("catalog_repeated_path.json");
+  const base = `${GCS}/ducklake/tables/obs_ctd_full/cruise_key=`;
+  const s = resolveTable(repeated, "obs_ctd_full");
+  assert.deepEqual(s.urls, [
+    `${base}1994-03-31JD/7c12d6b2ec5697fdb745ae62/data_0.parquet`,
+    `${base}2015-11-32OC/6a5b5b98bed1d952b0bd5a90/data_0.parquet`,
+    `${base}2026-11-33P4/0d0d0d0d0d0d0d0d0d0d0d0d/data_0.parquet`]);
+  assert.equal(s.hashes.length, 3);
+  assert.equal(s.localPaths.length, 3);
+  assert.equal(s.hashes[1], "6a5b5b98bed1d952b0bd5a90bbbbbbbb");
+  assert.deepEqual(resolveTable(repeated, "cruise").urls,
+    [`${GCS}/ducklake/tables/cruise/a1b2c3d4e5f60718293a4b5c/cruise.parquet`]);
+});
